@@ -56,6 +56,38 @@ namespace MyCompany.MyApp
                 publicSubnets.Add(subnet);
             }
 
+            var mainIgw = new InternetGateway(this, "main-igw", new InternetGatewayConfig
+            {
+                VpcId = vpc.Id,
+                Tags = new Dictionary<string, string>
+                {
+                  ["Name"] = "ckdtf-main-igw"  
+                }
+            });
+
+            var mainRtb = new RouteTable(this, "main-rtb", new RouteTableConfig
+            {
+                VpcId = vpc.Id,
+                Route = new 
+                {
+                    CidrBlock = "0.0.0.0/0",
+                    GatewayId = mainIgw.Id
+                },
+                Tags = new Dictionary<string, string>
+                {
+                    ["Name"] = "ckdtf-rtb"
+                }
+            });
+
+            for (var i = 0; i < publicSubnets.Count; i++)
+            {
+                new RouteTableAssociation(this, $"main-public-{i}", new RouteTableAssociationConfig
+                {
+                    SubnetId = publicSubnets[i].Id,
+                    RouteTableId = mainRtb.Id
+                });
+            }
+            
             new TerraformOutput(this, "vpc id", new TerraformOutputConfig()
             {
                 Value = vpc.Id
