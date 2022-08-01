@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Constructs;
 using HashiCorp.Cdktf;
 using HashiCorp.Cdktf.Providers.Aws;
+using HashiCorp.Cdktf.Providers.Aws.Ec2;
 using HashiCorp.Cdktf.Providers.Aws.Vpc;
 
 
@@ -63,6 +65,13 @@ namespace MyCompany.MyApp
                 ["Name"] = "cdktf-allow-ssh",
                 ["Env"] = "dev"
             }
+            });
+
+            var mykey = new KeyPair(this, "mykey", new KeyPairConfig
+            {
+                KeyName = "mykey",
+                // PublicKey = Fn.File("./mykey.pub")
+                PublicKey = File.ReadAllText("mykey.pub")
             });
 
             var azs = "a,b,c".Split(",").Select(x => $"{region}{x}").ToList();
