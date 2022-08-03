@@ -1,3 +1,5 @@
+mykey.pub
+mykey
 
 # cdktf and terraform ignores
 .terraform

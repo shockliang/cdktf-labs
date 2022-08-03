@@ -23,6 +23,12 @@ namespace MyCompany.MyApp
                 Region = region
             });
 
+            var ubuntuAmis = new Dictionary<string, string>
+            {
+                ["us-east-1"] = "ami-0f65ab0fd913bc7be",
+                ["us-west-1"] = "ami-08daca4640726cc73"
+            };
+
             var vpc = new Vpc(this, "Vpc", new VpcConfig
             {
                 CidrBlock = "10.10.0.0/16",
@@ -33,12 +39,12 @@ namespace MyCompany.MyApp
                 }
             });
 
-            var securityGroup = new SecurityGroup(this, "cdktf-allow-ssh", new SecurityGroupConfig()
+            var allowSshSecurityGroup = new SecurityGroup(this, "cdktf-allow-ssh", new SecurityGroupConfig()
             {
                 VpcId = vpc.Id,
                 Name = "cdktf-allow-ssh",
                 Description = "security group that allow ssh and all egress traffic",
-                Egress = new []
+                Egress = new[]
                 {
                     new SecurityGroupEgress
                     {
@@ -49,7 +55,7 @@ namespace MyCompany.MyApp
                     }
                 },
 
-                Ingress = new []
+                Ingress = new[]
                 {
                     new SecurityGroupIngress
                     {
@@ -60,11 +66,11 @@ namespace MyCompany.MyApp
                     }
                 },
 
-                Tags = new Dictionary<string, string >
+                Tags = new Dictionary<string, string>
                 {
-                ["Name"] = "cdktf-allow-ssh",
-                ["Env"] = "dev"
-            }
+                    ["Name"] = "cdktf-allow-ssh",
+                    ["Env"] = "dev"
+                }
             });
 
             var mykey = new KeyPair(this, "mykey", new KeyPairConfig
@@ -89,6 +95,7 @@ namespace MyCompany.MyApp
                     VpcId = vpc.Id,
                     CidrBlock = $"10.10.{i}.0/24",
                     AvailabilityZone = azs[i - 1],
+                    MapPublicIpOnLaunch = true,
 
                     Tags = new Dictionary<string, string>
                     {
@@ -123,6 +130,34 @@ namespace MyCompany.MyApp
                 }
             });
 
+            var instance = new Instance(this, "create-instance-in-vpc", new InstanceConfig
+            {
+                Ami = ubuntuAmis[region],
+                InstanceType = "t2.micro",
+                SubnetId = publicSubnets.FirstOrDefault().Id,
+                VpcSecurityGroupIds = new[] { allowSshSecurityGroup.Id },
+                KeyName = mykey.KeyName
+            });
+
+            var extraVolume = new EbsVolume(this, "ebs-volume-1", new EbsVolumeConfig
+            {
+                AvailabilityZone = $"{region}a",
+                Size = 20,
+                Type = "gp2",
+                Tags = new Dictionary<string, string>()
+                {
+                    ["Name"] = "Extra volume"
+                }
+            });
+
+            new VolumeAttachment(this, "ebs-volume-1-attachment", new VolumeAttachmentConfig
+            {
+                DeviceName = "/dev/xvdh",
+                VolumeId = extraVolume.Id,
+                InstanceId = instance.Id,
+                StopInstanceBeforeDetaching = true
+            });
+
             for (var i = 0; i < publicSubnets.Count; i++)
             {
                 new RouteTableAssociation(this, $"main-public-{i}", new RouteTableAssociationConfig
@@ -135,6 +170,11 @@ namespace MyCompany.MyApp
             new TerraformOutput(this, "vpc id", new TerraformOutputConfig()
             {
                 Value = vpc.Id
+            });
+
+            new TerraformOutput(this, "instance public ip", new TerraformOutputConfig
+            {
+                Value = instance.PublicIp
             });
 
             foreach (var subnet in publicSubnets)
