@@ -9,7 +9,7 @@ using HashiCorp.Cdktf.Providers.Aws.Ec2;
 using HashiCorp.Cdktf.Providers.Aws.Vpc;
 
 
-namespace MyCompany.MyApp
+namespace Cdktf.Dotnet.VpcLab
 {
     class MyApp : TerraformStack
     {

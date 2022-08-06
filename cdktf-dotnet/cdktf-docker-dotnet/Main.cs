@@ -5,7 +5,7 @@ using HashiCorp.Cdktf;
 using HashiCorp.Cdktf.Providers.Docker;
 
 
-namespace MyCompany.MyApp
+namespace Cdktf.Dotnet.DockerLab
 {
     class MyApp : TerraformStack
     {

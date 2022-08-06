@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DockerLab", "cdktf-docker-dotnet\DockerLab.csproj", "{27F00F0E-8464-41D3-B424-A290AC3E5B7C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VpcLab", "cdktf-vpc-dotnet\VpcLab.csproj", "{237BCA62-F2EA-483E-ABC4-D6641E5F3134}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{27F00F0E-8464-41D3-B424-A290AC3E5B7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27F00F0E-8464-41D3-B424-A290AC3E5B7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27F00F0E-8464-41D3-B424-A290AC3E5B7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27F00F0E-8464-41D3-B424-A290AC3E5B7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{237BCA62-F2EA-483E-ABC4-D6641E5F3134}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{237BCA62-F2EA-483E-ABC4-D6641E5F3134}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{237BCA62-F2EA-483E-ABC4-D6641E5F3134}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{237BCA62-F2EA-483E-ABC4-D6641E5F3134}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
