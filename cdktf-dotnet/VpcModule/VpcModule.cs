@@ -5,7 +5,7 @@ using Constructs;
 using HashiCorp.Cdktf;
 using HashiCorp.Cdktf.Providers.Aws.Vpc;
 
-namespace MyCompany.MyApp
+namespace Cdktf.Dotnet.VpcModule.Aws
 {
     public class VpcModule
     {

@@ -1,4 +1,5 @@
 using System;
+using Cdktf.Dotnet.VpcModule.Aws;
 using Constructs;
 using HashiCorp.Cdktf;
 using HashiCorp.Cdktf.Providers.Aws;
