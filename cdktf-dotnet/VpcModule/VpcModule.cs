@@ -11,6 +11,7 @@ namespace Cdktf.Dotnet.VpcModule.Aws
     {
         public string Region { get; set; } = "us-east-1";
         public string CidrBlock { get; set; } = "10.10.0.0/16";
+        public List<Subnet> PublicSubnets { get; }
 
         public string VpcId => _vpc.Id;
 
@@ -28,39 +29,39 @@ namespace Cdktf.Dotnet.VpcModule.Aws
                 }
             });
 
-            var allowSshSecurityGroup = new SecurityGroup(scope, "cdktf-allow-ssh", new SecurityGroupConfig()
-            {
-                VpcId = _vpc.Id,
-                Name = "cdktf-allow-ssh",
-                Description = "security group that allow ssh and all egress traffic",
-                Egress = new[]
-                {
-                    new SecurityGroupEgress
-                    {
-                        CidrBlocks = new[] { "0.0.0.0/0" },
-                        FromPort = 0,
-                        ToPort = 0,
-                        Protocol = "-1"
-                    }
-                },
-
-                Ingress = new[]
-                {
-                    new SecurityGroupIngress
-                    {
-                        CidrBlocks = new[] { "0.0.0.0/0" },
-                        FromPort = 22,
-                        ToPort = 22,
-                        Protocol = "tcp"
-                    }
-                },
-
-                Tags = new Dictionary<string, string>
-                {
-                    ["Name"] = "cdktf-allow-ssh",
-                    ["Env"] = "dev"
-                }
-            });
+            // var allowSshSecurityGroup = new SecurityGroup(scope, "cdktf-allow-ssh", new SecurityGroupConfig()
+            // {
+            //     VpcId = _vpc.Id,
+            //     Name = "cdktf-allow-ssh",
+            //     Description = "security group that allow ssh and all egress traffic",
+            //     Egress = new[]
+            //     {
+            //         new SecurityGroupEgress
+            //         {
+            //             CidrBlocks = new[] { "0.0.0.0/0" },
+            //             FromPort = 0,
+            //             ToPort = 0,
+            //             Protocol = "-1"
+            //         }
+            //     },
+            //
+            //     Ingress = new[]
+            //     {
+            //         new SecurityGroupIngress
+            //         {
+            //             CidrBlocks = new[] { "0.0.0.0/0" },
+            //             FromPort = 22,
+            //             ToPort = 22,
+            //             Protocol = "tcp"
+            //         }
+            //     },
+            //
+            //     Tags = new Dictionary<string, string>
+            //     {
+            //         ["Name"] = "cdktf-allow-ssh",
+            //         ["Env"] = "dev"
+            //     }
+            // });
 
             var azs = "a,b,c".Split(",").Select(x => $"{Region}{x}").ToList();
             foreach (var az in azs)
@@ -68,7 +69,7 @@ namespace Cdktf.Dotnet.VpcModule.Aws
                 Console.WriteLine(az);
             }
 
-            var publicSubnets = new List<Subnet>();
+            PublicSubnets = new List<Subnet>();
 
             for (var i = 1; i <= 3; i++)
             {
@@ -86,7 +87,7 @@ namespace Cdktf.Dotnet.VpcModule.Aws
                     }
                 });
 
-                publicSubnets.Add(subnet);
+                PublicSubnets.Add(subnet);
             }
 
             var mainIgw = new InternetGateway(scope, "main-igw", new InternetGatewayConfig
@@ -112,11 +113,11 @@ namespace Cdktf.Dotnet.VpcModule.Aws
                 }
             });
 
-            for (var i = 0; i < publicSubnets.Count; i++)
+            for (var i = 0; i < PublicSubnets.Count; i++)
             {
                 new RouteTableAssociation(scope, $"main-public-{i}", new RouteTableAssociationConfig
                 {
-                    SubnetId = publicSubnets[i].Id,
+                    SubnetId = PublicSubnets[i].Id,
                     RouteTableId = mainRtb.Id
                 });
             }
@@ -128,7 +129,7 @@ namespace Cdktf.Dotnet.VpcModule.Aws
                 Value = _vpc.Id
             });
 
-            foreach (var subnet in publicSubnets)
+            foreach (var subnet in PublicSubnets)
             {
                 new TerraformOutput(scope, $"{subnet} id", new TerraformOutputConfig()
                 {
