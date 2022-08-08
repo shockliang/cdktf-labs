@@ -1,6 +1,6 @@
 {
   "language": "csharp",
-  "app": "dotnet run -p MyTerraformStack.csproj",
+  "app": "dotnet run --project VpcLab.csproj",
   "projectId": "9ac77e3d-75d5-49af-b73f-1aaa7dd860f2",
   "sendCrashReports": "true",
   "terraformProviders": [],

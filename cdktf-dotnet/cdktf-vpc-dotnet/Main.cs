@@ -28,20 +28,12 @@ namespace Cdktf.Dotnet.VpcLab
                 ["us-east-1"] = "ami-0f65ab0fd913bc7be",
                 ["us-west-1"] = "ami-08daca4640726cc73"
             };
-
-            var vpc = new Vpc(this, "Vpc", new VpcConfig
-            {
-                CidrBlock = "10.10.0.0/16",
-                Tags = new Dictionary<string, string>
-                {
-                    ["Name"] = "ckdtf-vpc",
-                    ["Env"] = "dev"
-                }
-            });
+            
+            var vpc = new VpcModule.Aws.VpcModule(this, "Vpc");
 
             var allowSshSecurityGroup = new SecurityGroup(this, "cdktf-allow-ssh", new SecurityGroupConfig()
             {
-                VpcId = vpc.Id,
+                VpcId = vpc.VpcId,
                 Name = "cdktf-allow-ssh",
                 Description = "security group that allow ssh and all egress traffic",
                 Egress = new[]
@@ -79,62 +71,12 @@ namespace Cdktf.Dotnet.VpcLab
                 // PublicKey = Fn.File("./mykey.pub")
                 PublicKey = File.ReadAllText("mykey.pub")
             });
-
-            var azs = "a,b,c".Split(",").Select(x => $"{region}{x}").ToList();
-            foreach (var az in azs)
-            {
-                Console.WriteLine(az);
-            }
-
-            var publicSubnets = new List<Subnet>();
-
-            for (var i = 1; i <= 3; i++)
-            {
-                var subnet = new Subnet(this, $"public-subnet-{i}", new SubnetConfig
-                {
-                    VpcId = vpc.Id,
-                    CidrBlock = $"10.10.{i}.0/24",
-                    AvailabilityZone = azs[i - 1],
-                    MapPublicIpOnLaunch = true,
-
-                    Tags = new Dictionary<string, string>
-                    {
-                        ["Name"] = $"ckdtf-public-subnet-{i}",
-                        ["Env"] = "dev"
-                    }
-                });
-
-                publicSubnets.Add(subnet);
-            }
-
-            var mainIgw = new InternetGateway(this, "main-igw", new InternetGatewayConfig
-            {
-                VpcId = vpc.Id,
-                Tags = new Dictionary<string, string>
-                {
-                    ["Name"] = "ckdtf-main-igw"
-                }
-            });
-
-            var mainRtb = new RouteTable(this, "main-rtb", new RouteTableConfig
-            {
-                VpcId = vpc.Id,
-                Route = new
-                {
-                    CidrBlock = "0.0.0.0/0",
-                    GatewayId = mainIgw.Id
-                },
-                Tags = new Dictionary<string, string>
-                {
-                    ["Name"] = "ckdtf-rtb"
-                }
-            });
-
+            
             var instance = new Instance(this, "create-instance-in-vpc", new InstanceConfig
             {
                 Ami = ubuntuAmis[region],
                 InstanceType = "t2.micro",
-                SubnetId = publicSubnets.FirstOrDefault().Id,
+                SubnetId = vpc.PublicSubnets.FirstOrDefault().Id,
                 VpcSecurityGroupIds = new[] { allowSshSecurityGroup.Id },
                 KeyName = mykey.KeyName
             });
@@ -158,40 +100,10 @@ namespace Cdktf.Dotnet.VpcLab
                 StopInstanceBeforeDetaching = true
             });
 
-            for (var i = 0; i < publicSubnets.Count; i++)
-            {
-                new RouteTableAssociation(this, $"main-public-{i}", new RouteTableAssociationConfig
-                {
-                    SubnetId = publicSubnets[i].Id,
-                    RouteTableId = mainRtb.Id
-                });
-            }
-
-            new TerraformOutput(this, "vpc id", new TerraformOutputConfig()
-            {
-                Value = vpc.Id
-            });
-
             new TerraformOutput(this, "instance public ip", new TerraformOutputConfig
             {
                 Value = instance.PublicIp
             });
-
-            foreach (var subnet in publicSubnets)
-            {
-                new TerraformOutput(this, $"{subnet} id", new TerraformOutputConfig()
-                {
-                    Value = subnet.Id
-                });
-            }
-
-            foreach (var subnet in publicSubnets)
-            {
-                new TerraformOutput(this, $"{subnet} az", new TerraformOutputConfig()
-                {
-                    Value = subnet.AvailabilityZone
-                });
-            }
         }
 
         public static void Main(string[] args)

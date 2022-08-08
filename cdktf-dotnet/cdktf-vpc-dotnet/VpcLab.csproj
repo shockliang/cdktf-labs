@@ -11,4 +11,8 @@
     <PackageReference Include="HashiCorp.Cdktf.Providers.Aws" Version="8.0.21" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\VpcModule\VpcModule.csproj" />
+  </ItemGroup>
+
 </Project>
