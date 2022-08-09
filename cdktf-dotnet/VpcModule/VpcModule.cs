@@ -5,7 +5,7 @@ using Constructs;
 using HashiCorp.Cdktf;
 using HashiCorp.Cdktf.Providers.Aws.Vpc;
 
-namespace Cdktf.Dotnet.VpcModule.Aws
+namespace Cdktf.Dotnet.Aws
 {
     public class VpcModule
     {
@@ -28,40 +28,6 @@ namespace Cdktf.Dotnet.VpcModule.Aws
                     ["Env"] = "dev"
                 }
             });
-
-            // var allowSshSecurityGroup = new SecurityGroup(scope, "cdktf-allow-ssh", new SecurityGroupConfig()
-            // {
-            //     VpcId = _vpc.Id,
-            //     Name = "cdktf-allow-ssh",
-            //     Description = "security group that allow ssh and all egress traffic",
-            //     Egress = new[]
-            //     {
-            //         new SecurityGroupEgress
-            //         {
-            //             CidrBlocks = new[] { "0.0.0.0/0" },
-            //             FromPort = 0,
-            //             ToPort = 0,
-            //             Protocol = "-1"
-            //         }
-            //     },
-            //
-            //     Ingress = new[]
-            //     {
-            //         new SecurityGroupIngress
-            //         {
-            //             CidrBlocks = new[] { "0.0.0.0/0" },
-            //             FromPort = 22,
-            //             ToPort = 22,
-            //             Protocol = "tcp"
-            //         }
-            //     },
-            //
-            //     Tags = new Dictionary<string, string>
-            //     {
-            //         ["Name"] = "cdktf-allow-ssh",
-            //         ["Env"] = "dev"
-            //     }
-            // });
 
             var azs = "a,b,c".Split(",").Select(x => $"{Region}{x}").ToList();
             foreach (var az in azs)

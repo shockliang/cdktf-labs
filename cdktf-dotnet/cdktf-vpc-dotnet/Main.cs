@@ -29,7 +29,7 @@ namespace Cdktf.Dotnet.VpcLab
                 ["us-west-1"] = "ami-08daca4640726cc73"
             };
             
-            var vpc = new VpcModule.Aws.VpcModule(this, "Vpc");
+            var vpc = new Aws.VpcModule(this, "Vpc");
 
             var allowSshSecurityGroup = new SecurityGroup(this, "cdktf-allow-ssh", new SecurityGroupConfig()
             {
