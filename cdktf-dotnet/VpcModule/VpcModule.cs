@@ -7,10 +7,9 @@ using HashiCorp.Cdktf.Providers.Aws.Vpc;
 
 namespace Cdktf.Dotnet.Aws
 {
-    public class VpcModule
+    public partial class VpcModule
     {
         public string Region { get; set; } = "us-east-1";
-        public string CidrBlock { get; set; } = "10.10.0.0/16";
         public List<Subnet> PublicSubnets { get; }
 
         public string VpcId => _vpc.Id;
