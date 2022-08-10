@@ -21,6 +21,13 @@ namespace Cdktf.Dotnet.Aws
             _vpc = new Vpc(scope, id, new VpcConfig
             {
                 CidrBlock = CidrBlock,
+                InstanceTenancy = InstanceTenancy,
+                EnableDnsHostnames = EnableDnsHostnames,
+                EnableDnsSupport = EnableDnsSupport,
+                EnableClassiclink = EnableClassicLink,
+                EnableClassiclinkDnsSupport = EnableClassicLinkDnsSupport,
+                AssignGeneratedIpv6CidrBlock = EnableIpv6,
+                
                 Tags = new Dictionary<string, string>
                 {
                     ["Name"] = "ckdtf-vpc",
