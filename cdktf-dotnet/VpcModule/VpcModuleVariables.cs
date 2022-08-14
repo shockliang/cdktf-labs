@@ -50,6 +50,16 @@ namespace Cdktf.Dotnet.Aws
         public bool EnableClassicLinkDnsSupport { get; set; } = false;
 
         /// <summary>
+        /// Controls if VPC should be created (it affects almost all resources)"
+        /// </summary>
+        public bool CreateVpc { get; set; } = true;
+        
+        /// <summary>
+        /// "Do you agree that Putin doesn't respect Ukrainian sovereignty and territorial integrity? More info: https://en.wikipedia.org/wiki/Putin_khuylo!"
+        /// </summary>
+        public bool PutinKhuylo { get; set; } = true;
+
+        /// <summary>
         /// A map of tags to add to all resources
         /// </summary>
         public IDictionary<string, string> Tags { get; set; } = new Dictionary<string, string>();

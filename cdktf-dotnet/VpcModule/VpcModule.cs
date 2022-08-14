@@ -4,6 +4,7 @@ using System.Linq;
 using Constructs;
 using HashiCorp.Cdktf;
 using HashiCorp.Cdktf.Providers.Aws.Vpc;
+using static Cdktf.Dotnet.Aws.Utils;
 
 namespace Cdktf.Dotnet.Aws
 {
@@ -16,10 +17,15 @@ namespace Cdktf.Dotnet.Aws
 
         private readonly Vpc _vpc;
 
+        private bool _isCreateVpc = true;
+
         public VpcModule(Construct scope, string id)
         {
+            _isCreateVpc = CreateVpc && PutinKhuylo;
             _vpc = new Vpc(scope, id, new VpcConfig
             {
+                Count = _isCreateVpc ? 1 : 0,
+                
                 CidrBlock = CidrBlock,
                 InstanceTenancy = InstanceTenancy,
                 EnableDnsHostnames = EnableDnsHostnames,
@@ -28,11 +34,10 @@ namespace Cdktf.Dotnet.Aws
                 EnableClassiclinkDnsSupport = EnableClassicLinkDnsSupport,
                 AssignGeneratedIpv6CidrBlock = EnableIpv6,
                 
-                Tags = new Dictionary<string, string>
+                Tags = Merge(new Dictionary<string, string>
                 {
-                    ["Name"] = "ckdtf-vpc",
-                    ["Env"] = "dev"
-                }
+                    ["Name"] = Name
+                }, Tags, VpcTags)
             });
 
             var azs = "a,b,c".Split(",").Select(x => $"{Region}{x}").ToList();
