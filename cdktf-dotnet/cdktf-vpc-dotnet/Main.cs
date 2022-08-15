@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Cdktf.Dotnet.Aws;
 using Constructs;
 using HashiCorp.Cdktf;
 using HashiCorp.Cdktf.Providers.Aws;
@@ -28,8 +29,12 @@ namespace Cdktf.Dotnet.VpcLab
                 ["us-east-1"] = "ami-0f65ab0fd913bc7be",
                 ["us-west-1"] = "ami-08daca4640726cc73"
             };
-            
-            var vpc = new Aws.VpcModule(this, "Vpc");
+
+            var vpcVars = new VpcModuleVariables
+            {
+                Name = "cdktf-vpc"
+            };
+            var vpc = new Aws.VpcModule(this, "Vpc", vpcVars);
 
             var allowSshSecurityGroup = new SecurityGroup(this, "cdktf-allow-ssh", new SecurityGroupConfig()
             {

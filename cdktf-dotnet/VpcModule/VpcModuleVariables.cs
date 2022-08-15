@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Cdktf.Dotnet.Aws
 {
-    public partial class VpcModule
+    public class VpcModuleVariables
     {
         /// <summary>
         /// Name to be used on all the resources as identifier

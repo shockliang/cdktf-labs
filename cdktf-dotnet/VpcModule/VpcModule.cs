@@ -8,8 +8,9 @@ using static Cdktf.Dotnet.Aws.Utils;
 
 namespace Cdktf.Dotnet.Aws
 {
-    public partial class VpcModule
+    public class VpcModule
     {
+        private readonly VpcModuleVariables _vars;
         public string Region { get; set; } = "us-east-1";
         public List<Subnet> PublicSubnets { get; }
 
@@ -19,27 +20,27 @@ namespace Cdktf.Dotnet.Aws
 
         private bool _isCreateVpc = true;
 
-        public VpcModule(Construct scope, string id)
+        public VpcModule(Construct scope, string id, VpcModuleVariables vars)
         {
-            _isCreateVpc = CreateVpc && PutinKhuylo;
+            _vars = vars;
+            _isCreateVpc = _vars.CreateVpc && _vars.PutinKhuylo;
             _vpc = new Vpc(scope, id, new VpcConfig
             {
                 Count = _isCreateVpc ? 1 : 0,
                 
-                CidrBlock = CidrBlock,
-                InstanceTenancy = InstanceTenancy,
-                EnableDnsHostnames = EnableDnsHostnames,
-                EnableDnsSupport = EnableDnsSupport,
-                EnableClassiclink = EnableClassicLink,
-                EnableClassiclinkDnsSupport = EnableClassicLinkDnsSupport,
-                AssignGeneratedIpv6CidrBlock = EnableIpv6,
+                CidrBlock = _vars.CidrBlock,
+                InstanceTenancy = _vars.InstanceTenancy,
+                EnableDnsHostnames = _vars.EnableDnsHostnames,
+                EnableDnsSupport = _vars.EnableDnsSupport,
+                EnableClassiclink = _vars.EnableClassicLink,
+                EnableClassiclinkDnsSupport = _vars.EnableClassicLinkDnsSupport,
+                AssignGeneratedIpv6CidrBlock = _vars.EnableIpv6,
                 
                 Tags = Merge(new Dictionary<string, string>
                 {
-                    ["Name"] = Name
-                }, Tags, VpcTags)
+                    ["Name"] = _vars.Name
+                }, _vars.Tags, _vars.VpcTags)
             });
-
             var azs = "a,b,c".Split(",").Select(x => $"{Region}{x}").ToList();
             foreach (var az in azs)
             {

@@ -19,7 +19,11 @@ namespace MyCompany.MyApp
                 Region = region
             });
 
-            var vpcModule = new VpcModule(this, "cdktf-vpc-module");
+            var vpcVars = new VpcModuleVariables
+            {
+                Name = "testing-dotnet-vpc-module"
+            };
+            var vpcModule = new VpcModule(this, "cdktf-vpc-module", vpcVars);
             
         }
 
