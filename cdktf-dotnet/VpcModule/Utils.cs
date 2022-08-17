@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Cdktf.Dotnet.Aws
 {
@@ -20,6 +21,20 @@ namespace Cdktf.Dotnet.Aws
             }
 
             return result;
+        }
+        
+        /// <summary>
+        /// https://www.terraform.io/language/functions/element
+        /// </summary>
+        /// <param name="items"></param>
+        /// <param name="index"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static T Element<T>(IEnumerable<T> items, int index)
+        {
+            return items.Count() <= index
+                ? items.ElementAtOrDefault(index % items.Count())
+                : items.ElementAtOrDefault(index);
         }
     }
 }

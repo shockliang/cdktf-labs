@@ -8,6 +8,8 @@ namespace VpcModule.Tests;
 
 public class UtilsTest
 {
+    #region Merge tests
+    
     [Fact]
     public async Task Merge_Difference_Key_Dictionary_ShouldReturnAllElements()
     {
@@ -124,4 +126,39 @@ public class UtilsTest
         actual["c"].Should().Be("x");
         actual["e"].Should().Be("f");
     }
+    
+    #endregion
+
+    #region Element tests
+
+    [Fact]
+    public async Task Index_NotOverTheElementRange_ShouldReturnTheElement()
+    {
+        // Arrange
+        var items = new[] { "a", "b", "c" };
+        
+        // Act
+        var actual = Utils.Element(items, 0);
+        
+        // Assert
+        actual.Should().Be("a");
+    }
+    
+    [Theory]
+    [InlineData(3, "a")]
+    [InlineData(4, "b")]
+    [InlineData(5, "c")]
+    public async Task Index_OverTheElementRange_ShouldWrapAround(int index, string expected)
+    {
+        // Arrange
+        var items = new[] { "a", "b", "c" };
+        
+        // Act
+        var actual = Utils.Element(items, index);
+
+        // Assert
+        actual.Should().Be(expected);
+    }
+
+    #endregion
 }
