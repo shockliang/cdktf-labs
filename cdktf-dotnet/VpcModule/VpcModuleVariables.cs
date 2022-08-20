@@ -69,5 +69,40 @@ namespace Cdktf.Dotnet.Aws
         /// </summary>
         public IDictionary<string, string> VpcTags { get; set; } = new Dictionary<string, string>();
 
+        /// <summary>
+        /// A list of public subnets inside the VPC
+        /// </summary>
+        public IList<string> PublicSubnets { get; set; } = new List<string>();
+        
+        /// <summary>
+        /// A list of private subnets inside the VPC
+        /// </summary>
+        public IList<string> PrivateSubnets { get; set; } = new List<string>();
+        
+        /// <summary>
+        /// A list of elasticache subnets
+        /// </summary>
+        public IList<string> ElasticacheSubnets { get; set; } = new List<string>();
+
+        /// <summary>
+        /// A list of outpost subnets inside the VPC
+        /// </summary>
+        public IList<string> OutpostSubnets { get; set; } = new List<string>();
+
+        /// <summary>
+        /// A list of database subnets
+        /// </summary>
+        public IList<string> DatabaseSubnets { get; set; } = new List<string>();
+
+        /// <summary>
+        /// A list of redshift subnets
+        /// </summary>
+        public IList<string> RedshiftSubnets { get; set; } = new List<string>();
+
+        /// <summary>
+        /// A list of intra subnets
+        /// </summary>
+        public IList<string> IntraSubnets { get; set; } = new List<string>();
+
     }
 }
