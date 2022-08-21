@@ -18,12 +18,23 @@ namespace Cdktf.Dotnet.Aws
 
         private readonly Vpc _vpc;
 
+        private readonly int _maxSubnetLength = 0;
+
         private bool _isCreateVpc = true;
 
         public VpcModule(Construct scope, string id, VpcModuleVariables vars)
         {
             _vars = vars;
             _isCreateVpc = _vars.CreateVpc && _vars.PutinKhuylo;
+            var allSubnetsCounts = new List<int>()
+            {
+                vars.PrivateSubnets.Count,
+                vars.ElasticacheSubnets.Count,
+                vars.DatabaseSubnets.Count,
+                vars.RedshiftSubnets.Count,
+            };
+            _maxSubnetLength = allSubnetsCounts.Max();
+            
             _vpc = new Vpc(scope, id, new VpcConfig
             {
                 Count = _isCreateVpc ? 1 : 0,
