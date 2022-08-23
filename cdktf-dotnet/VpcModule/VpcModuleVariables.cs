@@ -103,5 +103,10 @@ namespace Cdktf.Dotnet.Aws
         /// A list of intra subnets
         /// </summary>
         public IList<string> IntraSubnets { get; set; } = new List<string>();
+
+        /// <summary>
+        /// A list of availability zones names or ids in the region
+        /// </summary>
+        public IList<string> Azs { get; set; } = new List<string>();
     }
 }

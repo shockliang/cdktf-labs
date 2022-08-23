@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Cdktf.Dotnet.Aws;
 using Constructs;
 using HashiCorp.Cdktf;
@@ -21,7 +22,8 @@ namespace MyCompany.MyApp
 
             var vpcVars = new VpcModuleVariables
             {
-                Name = "testing-dotnet-vpc-module"
+                Name = "testing-dotnet-vpc-module",
+                Azs = "a,b,c".Split(",").Select(x => $"{region}{x}").ToList()
             };
             var vpcModule = new VpcModule(this, "cdktf-vpc-module", vpcVars);
             

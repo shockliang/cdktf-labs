@@ -52,8 +52,8 @@ namespace Cdktf.Dotnet.Aws
                     ["Name"] = _vars.Name
                 }, _vars.Tags, _vars.VpcTags)
             });
-            var azs = "a,b,c".Split(",").Select(x => $"{Region}{x}").ToList();
-            foreach (var az in azs)
+            
+            foreach (var az in vars.Azs)
             {
                 Console.WriteLine(az);
             }
@@ -66,7 +66,7 @@ namespace Cdktf.Dotnet.Aws
                 {
                     VpcId = _vpc.Id,
                     CidrBlock = $"10.10.{i}.0/24",
-                    AvailabilityZone = azs[i - 1],
+                    AvailabilityZone = vars.Azs[i - 1],
                     MapPublicIpOnLaunch = true,
 
                     Tags = new Dictionary<string, string>
