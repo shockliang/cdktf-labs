@@ -65,6 +65,20 @@ namespace Cdktf.Dotnet.Aws
                     }));
             }
 
+            var defaultSecurityGroup = new DefaultSecurityGroup(scope, id, new DefaultSecurityGroupConfig
+            {
+                Count = _isCreateVpc && vars.ManageDefaultSecurityGroup ? 1 : 0,
+                VpcId = _vpc.Id,
+                Ingress = vars.DefaultSecurityGroupIngresses,
+                Egress = vars.DefaultSecurityGroupEgresses,
+                Tags = Merge(new Dictionary<string, string>
+                {
+                    ["Name"] = vars.DefaultSecurityGroupName
+                }, 
+                    vars.Tags, 
+                    vars.DefaultSecurityGroupTags)
+            });
+
             foreach (var az in vars.Azs)
             {
                 Console.WriteLine(az);

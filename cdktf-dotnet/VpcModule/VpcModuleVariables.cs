@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using HashiCorp.Cdktf.Providers.Aws.Vpc;
 
 namespace Cdktf.Dotnet.Aws
 {
@@ -18,6 +19,11 @@ namespace Cdktf.Dotnet.Aws
         /// A tenancy option for instances launched into the VPC
         /// </summary>
         public string InstanceTenancy { get; set; } = "default";
+
+        /// <summary>
+        /// Name to be used on the default security group
+        /// </summary>
+        public string DefaultSecurityGroupName { get; set; } = "";
         
         /// <summary>
         /// Assign IPv6 address on subnet, must be disabled to change IPv6 CIDRs. This is the IPv6 equivalent of map_public_ip_on_launch
@@ -53,6 +59,11 @@ namespace Cdktf.Dotnet.Aws
         /// Controls if VPC should be created (it affects almost all resources)"
         /// </summary>
         public bool CreateVpc { get; set; } = true;
+
+        /// <summary>
+        /// Should be true to adopt and manage default security group
+        /// </summary>
+        public bool ManageDefaultSecurityGroup { get; set; } = false;
         
         /// <summary>
         /// "Do you agree that Putin doesn't respect Ukrainian sovereignty and territorial integrity? More info: https://en.wikipedia.org/wiki/Putin_khuylo!"
@@ -68,6 +79,11 @@ namespace Cdktf.Dotnet.Aws
         /// Additional tags for the VPC
         /// </summary>
         public IDictionary<string, string> VpcTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Additional tags for the default security group
+        /// </summary>
+        public IDictionary<string, string> DefaultSecurityGroupTags = new Dictionary<string, string>();
 
         /// <summary>
         /// A list of public subnets inside the VPC
@@ -113,5 +129,18 @@ namespace Cdktf.Dotnet.Aws
         /// List of secondary CIDR blocks to associate with the VPC to extend the IP Address pool
         /// </summary>
         public IList<string> SecondaryCidrBlocks { get; set; } = new List<string>();
+
+        /// <summary>
+        /// List of maps of ingress rules to set on the default security group
+        /// </summary>
+        public IList<DefaultSecurityGroupIngress> DefaultSecurityGroupIngresses { get; set; } =
+            new List<DefaultSecurityGroupIngress>();
+
+        /// <summary>
+        /// List of maps of egress rules to set on the default security group
+        /// </summary>
+        public IList<DefaultSecurityGroupEgress> DefaultSecurityGroupEgresses { get; set; } =
+            new List<DefaultSecurityGroupEgress>();
+
     }
 }
