@@ -34,11 +34,11 @@ namespace Cdktf.Dotnet.Aws
                 vars.RedshiftSubnets.Count,
             };
             _maxSubnetLength = allSubnetsCounts.Max();
-            
+
             _vpc = new Vpc(scope, id, new VpcConfig
             {
                 Count = _isCreateVpc ? 1 : 0,
-                
+
                 CidrBlock = _vars.CidrBlock,
                 InstanceTenancy = _vars.InstanceTenancy,
                 EnableDnsHostnames = _vars.EnableDnsHostnames,
@@ -46,13 +46,25 @@ namespace Cdktf.Dotnet.Aws
                 EnableClassiclink = _vars.EnableClassicLink,
                 EnableClassiclinkDnsSupport = _vars.EnableClassicLinkDnsSupport,
                 AssignGeneratedIpv6CidrBlock = _vars.EnableIpv6,
-                
+
                 Tags = Merge(new Dictionary<string, string>
                 {
                     ["Name"] = _vars.Name
                 }, _vars.Tags, _vars.VpcTags)
             });
-            
+
+            var awsVpcIpv4CidrBlockAssociations = new List<VpcIpv4CidrBlockAssociation>();
+            for (var i = 0; i < vars.SecondaryCidrBlocks.Count && _isCreateVpc; i++)
+            {
+                awsVpcIpv4CidrBlockAssociations.Add(new VpcIpv4CidrBlockAssociation(scope, id,
+                    new VpcIpv4CidrBlockAssociationConfig
+                    {
+                        Count = 1,
+                        VpcId = _vpc.Id,
+                        CidrBlock = vars.SecondaryCidrBlocks[i]
+                    }));
+            }
+
             foreach (var az in vars.Azs)
             {
                 Console.WriteLine(az);

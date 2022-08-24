@@ -108,5 +108,10 @@ namespace Cdktf.Dotnet.Aws
         /// A list of availability zones names or ids in the region
         /// </summary>
         public IList<string> Azs { get; set; } = new List<string>();
+
+        /// <summary>
+        /// List of secondary CIDR blocks to associate with the VPC to extend the IP Address pool
+        /// </summary>
+        public IList<string> SecondaryCidrBlocks { get; set; } = new List<string>();
     }
 }
