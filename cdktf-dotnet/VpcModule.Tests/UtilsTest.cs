@@ -161,4 +161,35 @@ public class UtilsTest
     }
 
     #endregion
+
+    #region Coalesce tests
+    
+    [Theory]
+    [InlineData("a", new []{"a", "b"})]
+    [InlineData("b", new []{"", "b"})]
+    public async Task It_Should_Return_FirstOne_ThatIsNot_Null_Or_EmptyString(string expected, string[] items)
+    {
+        // Arrange
+        
+        // Act
+        var actual = Utils.Coalesce(items);
+
+        // Assert
+        actual.Should().Be(expected);
+    }
+    
+    [Theory]
+    [InlineData(1, new []{1, 2})]
+    public async Task It_Should_Return_FirstOne_ThatIsNot_Null(int expected, int[] items)
+    {
+        // Arrange
+        
+        // Act
+        var actual = Utils.Coalesce(items);
+
+        // Assert
+        actual.Should().Be(expected);
+    }
+
+    #endregion
 }

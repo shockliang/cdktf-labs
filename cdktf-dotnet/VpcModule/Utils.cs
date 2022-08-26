@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -35,6 +36,23 @@ namespace Cdktf.Dotnet.Aws
             return items.Count() <= index
                 ? items.ElementAtOrDefault(index % items.Count())
                 : items.ElementAtOrDefault(index);
+        }
+
+        public static T Coalesce<T>(params T[] items)
+        {
+            foreach (var item in items)
+            {
+                if (item == null) continue;
+                if (item is string s && string.IsNullOrEmpty(s))
+                {
+                    continue;
+                }
+ 
+                return item;
+                
+            }
+
+            throw new ArgumentNullException();
         }
     }
 }
