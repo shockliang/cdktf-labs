@@ -35,6 +35,8 @@ namespace Cdktf.Dotnet.Aws
             };
             _maxSubnetLength = allSubnetsCounts.Max();
 
+            #region vpc
+            
             _vpc = new Vpc(scope, id, new VpcConfig
             {
                 Count = _isCreateVpc ? 1 : 0,
@@ -73,12 +75,39 @@ namespace Cdktf.Dotnet.Aws
                 Egress = vars.DefaultSecurityGroupEgresses,
                 Tags = Merge(new Dictionary<string, string>
                 {
-                    ["Name"] = vars.DefaultSecurityGroupName
+                    ["Name"] = Coalesce(vars.DefaultSecurityGroupName, vars.Name)
                 }, 
                     vars.Tags, 
                     vars.DefaultSecurityGroupTags)
             });
+            
+            #endregion
 
+            #region dhcp options set
+
+            var vpcDhcpOptions = new VpcDhcpOptions(scope, id, new VpcDhcpOptionsConfig
+            {
+                Count = _isCreateVpc && vars.EnableDhcpOptions ? 1 : 0,
+                DomainName = vars.DhcpOptionsDomainName,
+                NtpServers = vars.DhcpOptionsNtpServers.ToArray(),
+                NetbiosNameServers = vars.DhcpOptionsNetbiosNameServers.ToArray(),
+                NetbiosNodeType = vars.DhcpOptionsNetbiosNodeType,
+                
+                Tags = Merge(new Dictionary<string, string>
+                {
+                    ["Name"] = vars.Name
+                }, vars.Tags, vars.DhcpOptionsTags)
+            });
+
+            new VpcDhcpOptionsAssociation(scope, id, new VpcDhcpOptionsAssociationConfig
+            {
+                Count = _isCreateVpc && vars.EnableDhcpOptions ? 1 : 0,
+                VpcId = _vpc.Id,
+                DhcpOptionsId = vpcDhcpOptions.Id
+            });
+            
+            #endregion
+            
             foreach (var az in vars.Azs)
             {
                 Console.WriteLine(az);

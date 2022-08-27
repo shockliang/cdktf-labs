@@ -61,6 +61,41 @@ namespace Cdktf.Dotnet.Aws
         public bool CreateVpc { get; set; } = true;
 
         /// <summary>
+        /// Should be true if you want to specify a DHCP options set with a custom domain name, DNS servers, NTP servers, netbios servers, and/or netbios server type
+        /// </summary>
+        public bool EnableDhcpOptions { get; set; } = false;
+
+        /// <summary>
+        /// Specifies DNS name for DHCP options set (requires enable_dhcp_options set to true)
+        /// </summary>
+        public string DhcpOptionsDomainName { get; set; } = "";
+        
+        /// <summary>
+        /// Specify a list of DNS server addresses for DHCP options set, default to AWS provided (requires enable_dhcp_options set to true)
+        /// </summary>
+        public IList<string> DhcpOptionsDomainNameServers { get; set; } = new List<string> { "AmazonProvidedDNS" };
+
+        /// <summary>
+        /// Specify a list of NTP servers for DHCP options set (requires enable_dhcp_options set to true)
+        /// </summary>
+        public IList<string> DhcpOptionsNtpServers { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Specify a list of netbios servers for DHCP options set (requires enable_dhcp_options set to true)
+        /// </summary>
+        public IList<string> DhcpOptionsNetbiosNameServers { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Specify netbios node_type for DHCP options set (requires enable_dhcp_options set to true)
+        /// </summary>
+        public string DhcpOptionsNetbiosNodeType { get; set; } = "";
+
+        /// <summary>
+        /// Additional tags for the DHCP option set (requires enable_dhcp_options set to true)
+        /// </summary>
+        public IDictionary<string, string> DhcpOptionsTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
         /// Should be true to adopt and manage default security group
         /// </summary>
         public bool ManageDefaultSecurityGroup { get; set; } = false;
