@@ -36,7 +36,7 @@ namespace Cdktf.Dotnet.Aws
             _maxSubnetLength = allSubnetsCounts.Max();
 
             #region vpc
-            
+
             _vpc = new Vpc(scope, id, new VpcConfig
             {
                 Count = _isCreateVpc ? 1 : 0,
@@ -74,13 +74,13 @@ namespace Cdktf.Dotnet.Aws
                 Ingress = vars.DefaultSecurityGroupIngresses,
                 Egress = vars.DefaultSecurityGroupEgresses,
                 Tags = Merge(new Dictionary<string, string>
-                {
-                    ["Name"] = Coalesce(vars.DefaultSecurityGroupName, vars.Name)
-                }, 
-                    vars.Tags, 
+                    {
+                        ["Name"] = Coalesce(vars.DefaultSecurityGroupName, vars.Name)
+                    },
+                    vars.Tags,
                     vars.DefaultSecurityGroupTags)
             });
-            
+
             #endregion
 
             #region dhcp options set
@@ -92,7 +92,7 @@ namespace Cdktf.Dotnet.Aws
                 NtpServers = vars.DhcpOptionsNtpServers.ToArray(),
                 NetbiosNameServers = vars.DhcpOptionsNetbiosNameServers.ToArray(),
                 NetbiosNodeType = vars.DhcpOptionsNetbiosNodeType,
-                
+
                 Tags = Merge(new Dictionary<string, string>
                 {
                     ["Name"] = vars.Name
@@ -105,9 +105,33 @@ namespace Cdktf.Dotnet.Aws
                 VpcId = _vpc.Id,
                 DhcpOptionsId = vpcDhcpOptions.Id
             });
-            
+
             #endregion
-            
+
+            #region Internet gateway
+
+            var internetGateway = new InternetGateway(scope, id, new InternetGatewayConfig
+            {
+                Count = _isCreateVpc && vars.CreateIgw && vars.PublicSubnets.Count > 0 ? 1 : 0,
+                VpcId = _vpc.Id,
+                Tags = Merge(new Dictionary<string, string>
+                {
+                    ["Name"] = vars.Name
+                }, vars.Tags, vars.IgwTags)
+            });
+
+            var egressOnlyInternetGateway = new EgressOnlyInternetGateway(scope, id, new EgressOnlyInternetGatewayConfig
+            {
+                Count = _isCreateVpc && vars.CreateEgressOnlyIgw && vars.EnableIpv6 && _maxSubnetLength > 0 ? 1 : 0,
+                VpcId = _vpc.Id,
+                Tags = Merge(new Dictionary<string, string>
+                {
+                    ["name"] = vars.Name
+                }, vars.Tags, vars.IgwTags)
+            });
+
+            #endregion
+
             foreach (var az in vars.Azs)
             {
                 Console.WriteLine(az);

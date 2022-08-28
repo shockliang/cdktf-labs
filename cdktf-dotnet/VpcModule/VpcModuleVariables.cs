@@ -96,6 +96,21 @@ namespace Cdktf.Dotnet.Aws
         public IDictionary<string, string> DhcpOptionsTags { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
+        /// Controls if an Internet Gateway is created for public subnets and the related routes that connect them.
+        /// </summary>
+        public bool CreateIgw { get; set; } = true;
+        
+        /// <summary>
+        /// Controls if an Egress Only Internet Gateway is created and its related routes.
+        /// </summary>
+        public bool CreateEgressOnlyIgw { get; set; } = true;
+
+        /// <summary>
+        /// Additional tags for the internet gateway
+        /// </summary>
+        public IDictionary<string, string> IgwTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
         /// Should be true to adopt and manage default security group
         /// </summary>
         public bool ManageDefaultSecurityGroup { get; set; } = false;
