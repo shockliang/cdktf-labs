@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HashiCorp.Cdktf" Version="0.11.2" />
-    <PackageReference Include="HashiCorp.Cdktf.Providers.Aws" Version="8.0.21" />
+    <PackageReference Include="HashiCorp.Cdktf" Version="0.12.2" />
+    <PackageReference Include="HashiCorp.Cdktf.Providers.Aws" Version="9.0.16" />
   </ItemGroup>
 
   <ItemGroup>
