@@ -132,6 +132,30 @@ namespace Cdktf.Dotnet.Aws
 
             #endregion
 
+            #region Default route
+
+            var defaultRouteTable = new DefaultRouteTable(scope, id, new DefaultRouteTableConfig
+            {
+                Count = _isCreateVpc && vars.ManageDefaultRouteTable ? 1 : 0,
+                DefaultRouteTableId = _vpc.DefaultRouteTableId,
+                PropagatingVgws = vars.DefaultRouteTablePropagatingVgws.ToArray(),
+                
+                Route = vars.DefaultRouteTableRoutes.ToArray(),
+                
+                Timeouts = new DefaultRouteTableTimeouts()
+                {
+                    Create = "5m",
+                    Update = "5m"
+                },
+                 
+                Tags = Merge(new Dictionary<string, string>
+                {
+                    ["Name"] = Coalesce(vars.DefaultRouteTableName, vars.Name)
+                }, vars.Tags, vars.DefaultRouteTableTags)
+            });
+
+            #endregion
+
             foreach (var az in vars.Azs)
             {
                 Console.WriteLine(az);

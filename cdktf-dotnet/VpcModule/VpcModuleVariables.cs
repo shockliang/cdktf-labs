@@ -111,6 +111,31 @@ namespace Cdktf.Dotnet.Aws
         public IDictionary<string, string> IgwTags { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
+        /// Should be true to manage default route table
+        /// </summary>
+        public bool ManageDefaultRouteTable { get; set; } = false;
+        
+        /// <summary>
+        /// List of virtual gateways for propagation
+        /// </summary>
+        public IList<string> DefaultRouteTablePropagatingVgws { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Name to be used on the default route table
+        /// </summary>
+        public string DefaultRouteTableName { get; set; } = "";
+
+        /// <summary>
+        /// Additional tags for the default route table
+        /// </summary>
+        public IDictionary<string, string> DefaultRouteTableTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Configuration block of routes. See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_route_table#route
+        /// </summary>
+        public IList<DefaultRouteTableRoute> DefaultRouteTableRoutes { get; set; } = new List<DefaultRouteTableRoute>();
+
+        /// <summary>
         /// Should be true to adopt and manage default security group
         /// </summary>
         public bool ManageDefaultSecurityGroup { get; set; } = false;
