@@ -156,6 +156,41 @@ namespace Cdktf.Dotnet.Aws
 
             #endregion
 
+            #region Publiс routes
+
+            var publicRouteTable = new RouteTable(scope, id, new RouteTableConfig
+            {
+                Count = _isCreateVpc && vars.PublicSubnets.Count > 0 ? 1: 0,
+                VpcId = _vpc.Id,
+                Tags = Merge(new Dictionary<string, string>
+                {
+                    ["Name"] = $"{vars.Name}-{vars.PublicSubnetSuffix}"
+                }, vars.Tags, vars.PublicRouteTableTags)
+            });
+
+            var publicInternetGateway = new Route(scope, id, new RouteConfig
+            {
+                Count = _isCreateVpc && vars.CreateIgw && vars.PublicSubnets.Count > 0 ? 1 : 0,
+                RouteTableId = publicRouteTable.Id,
+                DestinationCidrBlock = "0.0.0.0/0",
+                GatewayId = internetGateway.Id,
+                
+                Timeouts = new RouteTimeouts
+                {
+                    Create = "5m"
+                }
+            });
+
+            var publicInternetGatewayIpv6 = new Route(scope, id, new RouteConfig
+            {
+                Count = _isCreateVpc && vars.CreateIgw && vars.EnableIpv6 && vars.PublicSubnets.Count > 0 ? 1 : 0,
+                RouteTableId = publicRouteTable.Id,
+                DestinationIpv6CidrBlock = "::/0",
+                GatewayId = internetGateway.Id
+            });
+
+            #endregion
+
             foreach (var az in vars.Azs)
             {
                 Console.WriteLine(az);

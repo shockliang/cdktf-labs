@@ -136,6 +136,13 @@ namespace Cdktf.Dotnet.Aws
         public IList<DefaultRouteTableRoute> DefaultRouteTableRoutes { get; set; } = new List<DefaultRouteTableRoute>();
 
         /// <summary>
+        /// Suffix to append to public subnets name
+        /// </summary>
+        public string PublicSubnetSuffix { get; set; } = "public";
+
+        public IDictionary<string, string> PublicRouteTableTags = new Dictionary<string, string>();
+
+        /// <summary>
         /// Should be true to adopt and manage default security group
         /// </summary>
         public bool ManageDefaultSecurityGroup { get; set; } = false;
