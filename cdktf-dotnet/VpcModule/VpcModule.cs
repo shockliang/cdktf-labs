@@ -224,6 +224,76 @@ namespace Cdktf.Dotnet.Aws
             
             #endregion
 
+            #region Database routes
+
+            var createDatabaseRouteTableCount = _isCreateVpc
+                                                && vars.CreateDatabaseSubnetRouteTable
+                                                && vars.DatabaseSubnets.Count > 0
+                ? vars.SingleNatGateway || vars.CreateDatabaseInternetGatewayRoute
+                    ? 1
+                    : vars.DatabaseSubnets.Count
+                : 0;
+
+            var databaseRouteTables = new List<RouteTable>();
+            for (var i = 0; i < createDatabaseRouteTableCount; i++)
+            {
+                databaseRouteTables.Add(new RouteTable(scope, id, new RouteTableConfig
+                {
+                    Count = 1,
+                    VpcId = _vpc.Id,
+                    Tags = Merge(new Dictionary<string, string>
+                        {
+                            ["Name"] = vars.SingleNatGateway || vars.CreateDatabaseInternetGatewayRoute
+                                ? $"{vars.Name}-{vars.DatabaseSubnetSuffix}"
+                                : $"{vars.Name}-{vars.DatabaseSubnetSuffix}-{i}"
+                        },
+                        vars.Tags,
+                        vars.DatabaseRouteTableTags)
+                }));
+            }
+
+            var databaseInternetGateway = new Route(scope, id, new RouteConfig
+            {
+                Count = _isCreateVpc
+                        && vars.CreateIgw
+                        && vars.CreateDatabaseSubnetRouteTable
+                        && vars.DatabaseSubnets.Count > 0
+                        && vars.CreateDatabaseInternetGatewayRoute
+                        && vars.CreateDatabaseNatGatewayRoute == false
+                    ? 1
+                    : 0,
+                RouteTableId = databaseRouteTables.FirstOrDefault().Id,
+                DestinationCidrBlock = "0.0.0.0/0",
+                GatewayId = internetGateway.Id,
+                
+                Timeouts = new RouteTimeouts
+                {
+                    Create = "5m"
+                }
+            });
+
+            var databaseIpv6Egress = new Route(scope, id, new RouteConfig
+            {
+                Count = _isCreateVpc
+                        && vars.CreateEgressOnlyIgw
+                        && vars.EnableIpv6
+                        && vars.CreateDatabaseSubnetRouteTable
+                        && vars.DatabaseSubnets.Count > 0
+                        && vars.CreateDatabaseInternetGatewayRoute
+                    ? 1
+                    : 0,
+                RouteTableId = databaseRouteTables.FirstOrDefault().Id,
+                DestinationIpv6CidrBlock = "::/0",
+                EgressOnlyGatewayId = egressOnlyInternetGateway.Id,
+                
+                Timeouts = new RouteTimeouts
+                {
+                    Create = "5m"
+                }
+            });
+            
+            #endregion
+
             foreach (var az in vars.Azs)
             {
                 Console.WriteLine(az);

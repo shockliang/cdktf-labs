@@ -161,11 +161,36 @@ namespace Cdktf.Dotnet.Aws
         /// Suffix to append to private subnets name
         /// </summary>
         public string PrivateSubnetSuffix { get; set; } = "private";
-
+        
         /// <summary>
         /// Additional tags for the private route tables
         /// </summary>
         public IDictionary<string, string> PrivateRouteTableTags = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Controls if separate route table for database should be created
+        /// </summary>
+        public bool CreateDatabaseSubnetRouteTable { get; set; } = false;
+
+        /// <summary>
+        /// Controls if an internet gateway route for public database access should be created
+        /// </summary>
+        public bool CreateDatabaseInternetGatewayRoute { get; set; } = false;
+
+        /// <summary>
+        /// Controls if a nat gateway route should be created to give internet access to the database subnets
+        /// </summary>
+        public bool CreateDatabaseNatGatewayRoute { get; set; } = false;
+
+        /// <summary>
+        /// Suffix to append to database subnets name
+        /// </summary>
+        public string DatabaseSubnetSuffix { get; set; } = "db";
+
+        /// <summary>
+        /// Additional tags for the database route tables
+        /// </summary>
+        public IDictionary<string, string> DatabaseRouteTableTags = new Dictionary<string, string>();
 
         /// <summary>
         /// "Do you agree that Putin doesn't respect Ukrainian sovereignty and territorial integrity? More info: https://en.wikipedia.org/wiki/Putin_khuylo!"
