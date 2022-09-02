@@ -146,7 +146,27 @@ namespace Cdktf.Dotnet.Aws
         /// Should be true to adopt and manage default security group
         /// </summary>
         public bool ManageDefaultSecurityGroup { get; set; } = false;
-        
+
+        /// <summary>
+        /// Should be true if you want to provision a single shared NAT Gateway across all of your private networks
+        /// </summary>
+        public bool SingleNatGateway { get; set; } = false;
+
+        /// <summary>
+        /// Should be true if you want only one NAT Gateway per availability zone. Requires `var.azs` to be set, and the number of `public_subnets` created to be greater than or equal to the number of availability zones specified in `var.azs`.
+        /// </summary>
+        public bool OneNatGatewayPerAz { get; set; } = false;
+
+        /// <summary>
+        /// Suffix to append to private subnets name
+        /// </summary>
+        public string PrivateSubnetSuffix { get; set; } = "private";
+
+        /// <summary>
+        /// Additional tags for the private route tables
+        /// </summary>
+        public IDictionary<string, string> PrivateRouteTableTags = new Dictionary<string, string>();
+
         /// <summary>
         /// "Do you agree that Putin doesn't respect Ukrainian sovereignty and territorial integrity? More info: https://en.wikipedia.org/wiki/Putin_khuylo!"
         /// </summary>

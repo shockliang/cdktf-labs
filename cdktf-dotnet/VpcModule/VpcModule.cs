@@ -22,10 +22,13 @@ namespace Cdktf.Dotnet.Aws
 
         private bool _isCreateVpc = true;
 
+        private int _natGatewayCount = 0;
+
         public VpcModule(Construct scope, string id, VpcModuleVariables vars)
         {
             _vars = vars;
             _isCreateVpc = _vars.CreateVpc && _vars.PutinKhuylo;
+            
             var allSubnetsCounts = new List<int>()
             {
                 vars.PrivateSubnets.Count,
@@ -34,6 +37,12 @@ namespace Cdktf.Dotnet.Aws
                 vars.RedshiftSubnets.Count,
             };
             _maxSubnetLength = allSubnetsCounts.Max();
+            
+            _natGatewayCount = vars.SingleNatGateway
+                ? 1
+                : vars.OneNatGatewayPerAz
+                    ? vars.Azs.Count
+                    : _maxSubnetLength;
 
             #region vpc
 
@@ -189,6 +198,30 @@ namespace Cdktf.Dotnet.Aws
                 GatewayId = internetGateway.Id
             });
 
+            #endregion
+
+            #region Private routes
+
+            // There are as many routing tables as the number of NAT gateways
+
+            var createPrivateRouteTableCount = _isCreateVpc && _maxSubnetLength > 0 ? _natGatewayCount : 0;
+            for (var i = 0; i < createPrivateRouteTableCount; i++)
+            {
+                var privateRouteTable = new RouteTable(scope, id, new RouteTableConfig
+                {
+                    Count = 1,
+                    VpcId = _vpc.Id,
+                    Tags = Merge(new Dictionary<string, string>
+                        {
+                            ["Name"] = vars.SingleNatGateway 
+                                ? $"{vars.Name}-{vars.PrivateSubnetSuffix}"
+                                : $"{vars.Name}-{vars.PrivateSubnetSuffix}-{i}"
+                        },
+                        vars.Tags,
+                        vars.PrivateRouteTableTags)
+                });
+            }
+            
             #endregion
 
             foreach (var az in vars.Azs)
