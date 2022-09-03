@@ -294,6 +294,22 @@ namespace Cdktf.Dotnet.Aws
             
             #endregion
 
+            #region Redshift routes
+
+            var redshiftRoute = new RouteTable(scope, id, new RouteTableConfig
+            {
+                Count = _isCreateVpc && vars.CreateRedshiftSubnetRouteTable && vars.RedshiftSubnets.Count > 0 ? 1 : 0,
+                VpcId = _vpc.Id,
+                Tags = Merge(new Dictionary<string, string>
+                    {
+                        ["Name"] = $"{vars.Name}-{vars.RedshiftSubnetSuffix}"
+                    },
+                    vars.Tags,
+                    vars.RedshiftRouteTableTags)
+            });
+
+            #endregion
+
             foreach (var az in vars.Azs)
             {
                 Console.WriteLine(az);

@@ -193,6 +193,21 @@ namespace Cdktf.Dotnet.Aws
         public IDictionary<string, string> DatabaseRouteTableTags = new Dictionary<string, string>();
 
         /// <summary>
+        /// Controls if separate route table for redshift should be created
+        /// </summary>
+        public bool CreateRedshiftSubnetRouteTable { get; set; } = false;
+
+        /// <summary>
+        /// Suffix to append to redshift subnets name
+        /// </summary>
+        public string RedshiftSubnetSuffix { get; set; } = "redshift";
+
+        /// <summary>
+        /// Additional tags for the redshift route tables
+        /// </summary>
+        public IDictionary<string, string> RedshiftRouteTableTags = new Dictionary<string, string>();
+
+        /// <summary>
         /// "Do you agree that Putin doesn't respect Ukrainian sovereignty and territorial integrity? More info: https://en.wikipedia.org/wiki/Putin_khuylo!"
         /// </summary>
         public bool PutinKhuylo { get; set; } = true;
