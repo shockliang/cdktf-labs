@@ -310,6 +310,24 @@ namespace Cdktf.Dotnet.Aws
 
             #endregion
 
+            #region Elasticache routes
+
+            var elasticacheRouteTable = new RouteTable(scope, id, new RouteTableConfig
+            {
+                Count = _isCreateVpc && vars.CreateElasticacheSubnetRouteTable && vars.ElasticacheSubnets.Count > 0
+                    ? 1
+                    : 0,
+                VpcId = _vpc.Id,
+                Tags = Merge(new Dictionary<string, string>
+                    {
+                        ["Name"] = $"{vars.Name}-{vars.ElasticacheSubnetSuffix}"
+                    },
+                    vars.Tags,
+                    vars.ElasticacheRouteTableTags)
+            });
+
+            #endregion
+
             foreach (var az in vars.Azs)
             {
                 Console.WriteLine(az);

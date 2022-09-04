@@ -208,6 +208,22 @@ namespace Cdktf.Dotnet.Aws
         public IDictionary<string, string> RedshiftRouteTableTags = new Dictionary<string, string>();
 
         /// <summary>
+        /// Controls if separate route table for elasticache should be created
+        /// </summary>
+        public bool CreateElasticacheSubnetRouteTable { get; set; } = false;
+
+        /// <summary>
+        /// Suffix to append to elasticache subnets name
+        /// </summary>
+        public string ElasticacheSubnetSuffix { get; set; } = "elasticache";
+
+        /// <summary>
+        /// Additional tags for the elasticache route tables
+        /// </summary>
+        public IDictionary<string, string> ElasticacheRouteTableTags { get; set; } =
+            new Dictionary<string, string>();
+
+        /// <summary>
         /// "Do you agree that Putin doesn't respect Ukrainian sovereignty and territorial integrity? More info: https://en.wikipedia.org/wiki/Putin_khuylo!"
         /// </summary>
         public bool PutinKhuylo { get; set; } = true;
