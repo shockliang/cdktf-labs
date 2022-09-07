@@ -328,6 +328,22 @@ namespace Cdktf.Dotnet.Aws
 
             #endregion
 
+            #region Intra routes
+
+            var intraRouteTable = new RouteTable(scope, id, new RouteTableConfig
+            {
+                Count = _isCreateVpc && vars.IntraSubnets.Count > 0 ? 1 : 0,
+                VpcId = _vpc.Id,
+                Tags = Merge(new Dictionary<string, string>
+                    {
+                        ["Name"] = $"{vars.Name}-{vars.IntraSubnetSuffix}"
+                    },
+                    vars.Tags,
+                    vars.IntraRouteTableTags)
+            });
+
+            #endregion
+
             foreach (var az in vars.Azs)
             {
                 Console.WriteLine(az);

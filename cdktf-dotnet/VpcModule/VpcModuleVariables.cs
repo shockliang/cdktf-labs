@@ -279,6 +279,16 @@ namespace Cdktf.Dotnet.Aws
         public IList<string> IntraSubnets { get; set; } = new List<string>();
 
         /// <summary>
+        /// Suffix to append to intra subnets name
+        /// </summary>
+        public string IntraSubnetSuffix { get; set; } = "intra";
+
+        /// <summary>
+        /// Additional tags for the intra route tables
+        /// </summary>
+        public IDictionary<string, string> IntraRouteTableTags = new Dictionary<string, string>();
+
+        /// <summary>
         /// A list of availability zones names or ids in the region
         /// </summary>
         public IList<string> Azs { get; set; } = new List<string>();
