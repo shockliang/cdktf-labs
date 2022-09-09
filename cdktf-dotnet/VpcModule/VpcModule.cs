@@ -344,31 +344,45 @@ namespace Cdktf.Dotnet.Aws
 
             #endregion
 
-            foreach (var az in vars.Azs)
-            {
-                Console.WriteLine(az);
-            }
+            #region Public subnets
+
+            var publicSubnetCount = _isCreateVpc
+                                    && vars.PublicSubnets.Count > 0
+                                    && (!vars.OneNatGatewayPerAz || vars.PublicSubnets.Count >= vars.Azs.Count)
+                ? vars.PublicSubnets.Count
+                : 0;
 
             PublicSubnets = new List<Subnet>();
 
-            for (var i = 1; i <= 3; i++)
+            for (var i = 0; i < publicSubnetCount; i++)
             {
                 var subnet = new Subnet(scope, $"public-subnet-{i}", new SubnetConfig
                 {
                     VpcId = _vpc.Id,
-                    CidrBlock = $"10.10.{i}.0/24",
-                    AvailabilityZone = vars.Azs[i - 1],
-                    MapPublicIpOnLaunch = true,
+                    CidrBlock = vars.PublicSubnets[i],
+                    AvailabilityZone = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length > 0 ? vars.Azs[i]: "",
+                    AvailabilityZoneId = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length == 0 ? vars.Azs[i]: "",
+                    MapPublicIpOnLaunch = vars.MapPublicIpOnLaunch,
+                    AssignIpv6AddressOnCreation = vars.PublicSubnetAssignIpv6AddressOnCreation == false
+                        ? vars.AssignIpv6AddressOnCreation
+                        : vars.PublicSubnetAssignIpv6AddressOnCreation,
 
-                    Tags = new Dictionary<string, string>
-                    {
-                        ["Name"] = $"ckdtf-public-subnet-{i}",
-                        ["Env"] = "dev"
-                    }
+                    Ipv6CidrBlock = vars.EnableIpv6 && vars.PublicSubnetIpv6Prefixes.Count > 0
+                        ? Fn.Cidrsubnet(_vpc.Ipv6CidrBlock, 8, double.Parse(vars.PublicSubnetIpv6Prefixes[i]))
+                        : "",
+
+                    Tags = Merge(new Dictionary<string, string>
+                        {
+                            ["Name"] = $"{vars.Name}-{vars.PublicSubnetSuffix}-{vars.Azs[i]}"
+                        },
+                        vars.Tags,
+                        vars.PublicSubnetTags)
                 });
 
                 PublicSubnets.Add(subnet);
             }
+            
+            #endregion
 
             var mainIgw = new InternetGateway(scope, "main-igw", new InternetGatewayConfig
             {

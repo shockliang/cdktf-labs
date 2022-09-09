@@ -289,6 +289,26 @@ namespace Cdktf.Dotnet.Aws
         public IDictionary<string, string> IntraRouteTableTags = new Dictionary<string, string>();
 
         /// <summary>
+        /// Should be false if you do not want to auto-assign public IP on launch
+        /// </summary>
+        public bool MapPublicIpOnLaunch { get; set; } = true;
+
+        /// <summary>
+        /// Assign IPv6 address on public subnet, must be disabled to change IPv6 CIDRs. This is the IPv6 equivalent of map_public_ip_on_launch
+        /// </summary>
+        public bool PublicSubnetAssignIpv6AddressOnCreation { get; set; } = false;
+
+        /// <summary>
+        /// Assigns IPv6 public subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list
+        /// </summary>
+        public IList<string> PublicSubnetIpv6Prefixes { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Additional tags for the public subnets
+        /// </summary>
+        public IDictionary<string, string> PublicSubnetTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
         /// A list of availability zones names or ids in the region
         /// </summary>
         public IList<string> Azs { get; set; } = new List<string>();
