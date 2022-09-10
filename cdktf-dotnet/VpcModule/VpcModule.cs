@@ -359,6 +359,7 @@ namespace Cdktf.Dotnet.Aws
             {
                 var subnet = new Subnet(scope, $"public-subnet-{i}", new SubnetConfig
                 {
+                    Count = 1,
                     VpcId = _vpc.Id,
                     CidrBlock = vars.PublicSubnets[i],
                     AvailabilityZone = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length > 0 ? vars.Azs[i]: "",
@@ -395,8 +396,9 @@ namespace Cdktf.Dotnet.Aws
 
             for (var i = 0; i < privateSubnetCount; i++)
             {
-                var subnet = new Subnet(scope, $"public-subnet-{i}", new SubnetConfig
+                var subnet = new Subnet(scope, $"private-subnet-{i}", new SubnetConfig
                 {
+                    Count = 1,
                     VpcId = _vpc.Id,
                     CidrBlock = vars.PrivateSubnets[i],
                     AvailabilityZone = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length > 0 ? vars.Azs[i]: "",
