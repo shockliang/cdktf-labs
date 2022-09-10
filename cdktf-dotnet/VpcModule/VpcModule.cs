@@ -13,6 +13,7 @@ namespace Cdktf.Dotnet.Aws
         private readonly VpcModuleVariables _vars;
         public string Region { get; set; } = "us-east-1";
         public List<Subnet> PublicSubnets { get; }
+        public List<Subnet> PrivateSubnets { get; }
 
         public string VpcId => _vpc.Id;
 
@@ -384,37 +385,42 @@ namespace Cdktf.Dotnet.Aws
             
             #endregion
 
-            var mainIgw = new InternetGateway(scope, "main-igw", new InternetGatewayConfig
-            {
-                VpcId = _vpc.Id,
-                Tags = new Dictionary<string, string>
-                {
-                    ["Name"] = "ckdtf-main-igw"
-                }
-            });
+            #region Private subnets
 
-            var mainRtb = new RouteTable(scope, "main-rtb", new RouteTableConfig
-            {
-                VpcId = _vpc.Id,
-                Route = new
-                {
-                    CidrBlock = "0.0.0.0/0",
-                    GatewayId = mainIgw.Id
-                },
-                Tags = new Dictionary<string, string>
-                {
-                    ["Name"] = "ckdtf-rtb"
-                }
-            });
+            var privateSubnetCount = _isCreateVpc && vars.PrivateSubnets.Count > 0
+                ? vars.PrivateSubnets.Count
+                : 0;
 
-            for (var i = 0; i < PublicSubnets.Count; i++)
+            PrivateSubnets = new List<Subnet>();
+
+            for (var i = 0; i < privateSubnetCount; i++)
             {
-                new RouteTableAssociation(scope, $"main-public-{i}", new RouteTableAssociationConfig
+                var subnet = new Subnet(scope, $"public-subnet-{i}", new SubnetConfig
                 {
-                    SubnetId = PublicSubnets[i].Id,
-                    RouteTableId = mainRtb.Id
+                    VpcId = _vpc.Id,
+                    CidrBlock = vars.PrivateSubnets[i],
+                    AvailabilityZone = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length > 0 ? vars.Azs[i]: "",
+                    AvailabilityZoneId = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length == 0 ? vars.Azs[i]: "",
+                    AssignIpv6AddressOnCreation = vars.PrivateSubnetAssignIpv6AddressOnCreation == false
+                        ? vars.AssignIpv6AddressOnCreation
+                        : vars.PrivateSubnetAssignIpv6AddressOnCreation,
+
+                    Ipv6CidrBlock = vars.EnableIpv6 && vars.PrivateSubnetIpv6Prefixes.Count > 0
+                        ? Fn.Cidrsubnet(_vpc.Ipv6CidrBlock, 8, double.Parse(vars.PrivateSubnetIpv6Prefixes[i]))
+                        : "",
+
+                    Tags = Merge(new Dictionary<string, string>
+                        {
+                            ["Name"] = $"{vars.Name}-{vars.PrivateSubnetSuffix}-{vars.Azs[i]}"
+                        },
+                        vars.Tags,
+                        vars.PrivateSubnetTags)
                 });
+
+                PrivateSubnets.Add(subnet);
             }
+
+            #endregion
 
             // Output
 

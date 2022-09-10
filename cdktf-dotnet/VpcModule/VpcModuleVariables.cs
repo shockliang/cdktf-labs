@@ -309,6 +309,21 @@ namespace Cdktf.Dotnet.Aws
         public IDictionary<string, string> PublicSubnetTags { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
+        /// Assign IPv6 address on private subnet, must be disabled to change IPv6 CIDRs. This is the IPv6 equivalent of map_public_ip_on_launch
+        /// </summary>
+        public bool PrivateSubnetAssignIpv6AddressOnCreation { get; set; } = false;
+
+        /// <summary>
+        /// Assigns IPv6 private subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list
+        /// </summary>
+        public IList<string> PrivateSubnetIpv6Prefixes { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Additional tags for the private subnets
+        /// </summary>
+        public IDictionary<string, string> PrivateSubnetTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
         /// A list of availability zones names or ids in the region
         /// </summary>
         public IList<string> Azs { get; set; } = new List<string>();
