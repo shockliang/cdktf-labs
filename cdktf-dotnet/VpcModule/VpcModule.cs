@@ -14,6 +14,7 @@ namespace Cdktf.Dotnet.Aws
         public string Region { get; set; } = "us-east-1";
         public List<Subnet> PublicSubnets { get; }
         public List<Subnet> PrivateSubnets { get; }
+        public List<Subnet> OutpostSubnets { get; }
 
         public string VpcId => _vpc.Id;
 
@@ -420,6 +421,44 @@ namespace Cdktf.Dotnet.Aws
                 });
 
                 PrivateSubnets.Add(subnet);
+            }
+
+            #endregion
+            
+            #region Outpost subnet
+
+            var outpostSubnetCount = _isCreateVpc && vars.OutpostSubnets.Count > 0
+                ? vars.OutpostSubnets.Count
+                : 0;
+
+            OutpostSubnets = new List<Subnet>();
+            
+            for (var i = 0; i < outpostSubnetCount; i++)
+            {
+                var subnet = new Subnet(scope, $"outpost-subnet-{i}", new SubnetConfig
+                {
+                    Count = 1,
+                    VpcId = _vpc.Id,
+                    CidrBlock = vars.OutpostSubnets[i],
+                    AvailabilityZone = vars.OutpostAz,
+                    AssignIpv6AddressOnCreation = vars.OutpostSubnetAssignIpv6AddressOnCreation == false
+                        ? vars.AssignIpv6AddressOnCreation
+                        : vars.OutpostSubnetAssignIpv6AddressOnCreation,
+
+                    Ipv6CidrBlock = vars.EnableIpv6 && vars.OutpostSubnetIpv6Prefixes.Count > 0
+                        ? Fn.Cidrsubnet(_vpc.Ipv6CidrBlock, 8, double.Parse(vars.OutpostSubnetIpv6Prefixes[i]))
+                        : "",
+                    OutpostArn = vars.OutpostArn,
+
+                    Tags = Merge(new Dictionary<string, string>
+                        {
+                            ["Name"] = $"{vars.Name}-{vars.OutpostSubnetSuffix}-{vars.OutpostAz}"
+                        },
+                        vars.Tags,
+                        vars.OutpostSubnetTags)
+                });
+
+                OutpostSubnets.Add(subnet);
             }
 
             #endregion

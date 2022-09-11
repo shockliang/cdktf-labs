@@ -324,6 +324,36 @@ namespace Cdktf.Dotnet.Aws
         public IDictionary<string, string> PrivateSubnetTags { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
+        /// AZ where Outpost is anchored.
+        /// </summary>
+        public string OutpostAz { get; set; } = "";
+
+        /// <summary>
+        /// Assign IPv6 address on outpost subnet, must be disabled to change IPv6 CIDRs. This is the IPv6 equivalent of map_public_ip_on_launch
+        /// </summary>
+        public bool OutpostSubnetAssignIpv6AddressOnCreation { get; set; } = false;
+
+        /// <summary>
+        /// Assigns IPv6 outpost subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list
+        /// </summary>
+        public IList<string> OutpostSubnetIpv6Prefixes { get; set; } = new List<string>();
+        
+        /// <summary>
+        /// ARN of Outpost you want to create a subnet in.
+        /// </summary>
+        public string OutpostArn { get; set; }
+
+        /// <summary>
+        /// Suffix to append to outpost subnets name
+        /// </summary>
+        public string OutpostSubnetSuffix { get; set; } = "outpost";
+
+        /// <summary>
+        /// Additional tags for the outpost subnets
+        /// </summary>
+        public IDictionary<string, string> OutpostSubnetTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
         /// A list of availability zones names or ids in the region
         /// </summary>
         public IList<string> Azs { get; set; } = new List<string>();
