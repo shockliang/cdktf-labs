@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Constructs;
 using HashiCorp.Cdktf;
+using HashiCorp.Cdktf.Providers.Aws.Rds;
 using HashiCorp.Cdktf.Providers.Aws.Vpc;
 using static Cdktf.Dotnet.Aws.Utils;
 
@@ -15,6 +16,8 @@ namespace Cdktf.Dotnet.Aws
         public List<Subnet> PublicSubnets { get; }
         public List<Subnet> PrivateSubnets { get; }
         public List<Subnet> OutpostSubnets { get; }
+        
+        public List<Subnet> DatabaseSubnets { get; }
 
         public string VpcId => _vpc.Id;
 
@@ -461,6 +464,57 @@ namespace Cdktf.Dotnet.Aws
                 OutpostSubnets.Add(subnet);
             }
 
+            #endregion
+
+            #region Database subnet
+
+            var databaseSubnetCount = _isCreateVpc && vars.DatabaseSubnets.Count > 0
+                ? vars.DatabaseSubnets.Count
+                : 0;
+
+            DatabaseSubnets = new List<Subnet>();
+            
+            for (var i = 0; i < databaseSubnetCount; i++)
+            {
+                var subnet = new Subnet(scope, $"database-subnet-{i}", new SubnetConfig
+                {
+                    Count = 1,
+                    VpcId = _vpc.Id,
+                    CidrBlock = vars.DatabaseSubnets[i],
+                    AvailabilityZone = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length > 0 ? vars.Azs[i]: "",
+                    AvailabilityZoneId = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length == 0 ? vars.Azs[i]: "",
+                    AssignIpv6AddressOnCreation = vars.DatabaseSubnetAssignIpv6AddressOnCreation == false
+                        ? vars.AssignIpv6AddressOnCreation
+                        : vars.DatabaseSubnetAssignIpv6AddressOnCreation,
+
+                    Ipv6CidrBlock = vars.EnableIpv6 && vars.DatabaseSubnetIpv6Prefixes.Count > 0
+                        ? Fn.Cidrsubnet(_vpc.Ipv6CidrBlock, 8, double.Parse(vars.DatabaseSubnetIpv6Prefixes[i]))
+                        : "",
+
+                    Tags = Merge(new Dictionary<string, string>
+                        {
+                            ["Name"] = $"{vars.Name}-{vars.DatabaseSubnetSuffix}-{vars.Azs[i]}"
+                        },
+                        vars.Tags,
+                        vars.DatabaseSubnetTags)
+                });
+
+                OutpostSubnets.Add(subnet);
+            }
+
+            var dbSubnetGroup = new DbSubnetGroup(scope, "db-subnet-group", new DbSubnetGroupConfig
+            {
+                Count = _isCreateVpc && vars.DatabaseSubnets.Count > 0 && vars.CreateDatabaseSubnetGroup ? 1 : 0,
+                Description = Coalesce(vars.DatabaseSubnetGroupName, vars.Name).ToLower(),
+                SubnetIds = DatabaseSubnets.Select(x => x.Id).ToArray(),
+                Tags = Merge(new Dictionary<string, string>
+                    {
+                        ["Name"] = Coalesce(vars.DatabaseSubnetGroupName, vars.Name).ToLower()
+                    },
+                    vars.Tags,
+                    vars.DatabaseSubnetGroupTags)
+            });
+            
             #endregion
 
             // Output

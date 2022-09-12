@@ -354,6 +354,36 @@ namespace Cdktf.Dotnet.Aws
         public IDictionary<string, string> OutpostSubnetTags { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
+        /// Assign IPv6 address on database subnet, must be disabled to change IPv6 CIDRs. This is the IPv6 equivalent of map_public_ip_on_launch
+        /// </summary>
+        public bool DatabaseSubnetAssignIpv6AddressOnCreation { get; set; } = false;
+
+        /// <summary>
+        /// Assigns IPv6 database subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list
+        /// </summary>
+        public IList<string> DatabaseSubnetIpv6Prefixes { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Additional tags for the database subnets
+        /// </summary>
+        public IDictionary<string, string> DatabaseSubnetTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Controls if database subnet group should be created (n.b. database_subnets must also be set)
+        /// </summary>
+        public bool CreateDatabaseSubnetGroup { get; set; } = true;
+
+        /// <summary>
+        /// Name of database subnet group
+        /// </summary>
+        public string DatabaseSubnetGroupName { get; set; } = "";
+
+        /// <summary>
+        /// Additional tags for the database subnet group
+        /// </summary>
+        public IDictionary<string, string> DatabaseSubnetGroupTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
         /// A list of availability zones names or ids in the region
         /// </summary>
         public IList<string> Azs { get; set; } = new List<string>();
