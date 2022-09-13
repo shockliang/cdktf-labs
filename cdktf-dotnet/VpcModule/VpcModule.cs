@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Constructs;
 using HashiCorp.Cdktf;
+using HashiCorp.Cdktf.Providers.Aws.Elasticache;
 using HashiCorp.Cdktf.Providers.Aws.Rds;
+using HashiCorp.Cdktf.Providers.Aws.Redshift;
 using HashiCorp.Cdktf.Providers.Aws.Vpc;
 using static Cdktf.Dotnet.Aws.Utils;
 
@@ -18,6 +20,7 @@ namespace Cdktf.Dotnet.Aws
         public List<Subnet> OutpostSubnets { get; }
         public List<Subnet> DatabaseSubnets { get; }
         public List<Subnet> RedshiftSubnets { get; }
+        public List<Subnet> ElasticacheSubnets { get; }
 
         public string VpcId => _vpc.Id;
 
@@ -325,7 +328,7 @@ namespace Cdktf.Dotnet.Aws
                 VpcId = _vpc.Id,
                 Tags = Merge(new Dictionary<string, string>
                     {
-                        ["Name"] = $"{vars.Name}-{vars.ElasticacheSubnetSuffix}"
+                        ["Name"] = $"{vars.Name}-{vars.ElastiCacheSubnetSuffix}"
                     },
                     vars.Tags,
                     vars.ElasticacheRouteTableTags)
@@ -505,7 +508,8 @@ namespace Cdktf.Dotnet.Aws
             var dbSubnetGroup = new DbSubnetGroup(scope, "db-subnet-group", new DbSubnetGroupConfig
             {
                 Count = _isCreateVpc && vars.DatabaseSubnets.Count > 0 && vars.CreateDatabaseSubnetGroup ? 1 : 0,
-                Description = Coalesce(vars.DatabaseSubnetGroupName, vars.Name).ToLower(),
+                Name = Coalesce(vars.DatabaseSubnetGroupName, vars.Name).ToLower(),
+                Description = $"Database subnet group for ${vars.Name}",
                 SubnetIds = DatabaseSubnets.Select(x => x.Id).ToArray(),
                 Tags = Merge(new Dictionary<string, string>
                     {
@@ -553,10 +557,11 @@ namespace Cdktf.Dotnet.Aws
                 RedshiftSubnets.Add(subnet);
             }
 
-            var redshiftSubnetGroup = new DbSubnetGroup(scope, "redshift-subnet-group", new DbSubnetGroupConfig
+            var redshiftSubnetGroup = new RedshiftSubnetGroup(scope, "redshift-subnet-group", new RedshiftSubnetGroupConfig
             {
                 Count = _isCreateVpc && vars.RedshiftSubnets.Count > 0 && vars.CreateRedshiftSubnetGroup ? 1 : 0,
-                Description = Coalesce(vars.RedshiftSubnetGroupName, vars.Name).ToLower(),
+                Name = Coalesce(vars.RedshiftSubnetGroupName, vars.Name).ToLower(),
+                Description = $"Redshift subnet group for ${vars.Name}",
                 SubnetIds = RedshiftSubnets.Select(x => x.Id).ToArray(),
                 Tags = Merge(new Dictionary<string, string>
                     {
@@ -564,6 +569,58 @@ namespace Cdktf.Dotnet.Aws
                     },
                     vars.Tags,
                     vars.RedshiftSubnetGroupTags)
+            });
+
+            #endregion
+
+            #region Elasticache subnet
+
+            var elasticacheSubnetCount = _isCreateVpc && vars.ElasticacheSubnets.Count > 0
+                ? vars.ElasticacheSubnets.Count
+                : 0;
+
+            ElasticacheSubnets = new List<Subnet>();
+            
+            for (var i = 0; i < elasticacheSubnetCount; i++)
+            {
+                var subnet = new Subnet(scope, $"elasticache-subnet-{i}", new SubnetConfig
+                {
+                    Count = 1,
+                    VpcId = _vpc.Id,
+                    CidrBlock = vars.ElasticacheSubnets[i],
+                    AvailabilityZone = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length > 0 ? vars.Azs[i]: "",
+                    AvailabilityZoneId = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length == 0 ? vars.Azs[i]: "",
+                    AssignIpv6AddressOnCreation = vars.ElasticacheSubnetAssignIpv6AddressOnCreation == false
+                        ? vars.AssignIpv6AddressOnCreation
+                        : vars.ElasticacheSubnetAssignIpv6AddressOnCreation,
+
+                    Ipv6CidrBlock = vars.EnableIpv6 && vars.ElasticacheSubnetIpv6Prefixes.Count > 0
+                        ? Fn.Cidrsubnet(_vpc.Ipv6CidrBlock, 8, double.Parse(vars.ElasticacheSubnetIpv6Prefixes[i]))
+                        : "",
+
+                    Tags = Merge(new Dictionary<string, string>
+                        {
+                            ["Name"] = $"{vars.Name}-{vars.ElastiCacheSubnetSuffix}-{vars.Azs[i]}"
+                        },
+                        vars.Tags,
+                        vars.ElasticacheSubnetTags)
+                });
+
+                ElasticacheSubnets.Add(subnet);
+            }
+
+            var elasticacheSubnetGroup = new ElasticacheSubnetGroup(scope, "redshift-subnet-group", new ElasticacheSubnetGroupConfig
+            {
+                Count = _isCreateVpc && vars.ElasticacheSubnets.Count > 0 && vars.CreateElasticacheSubnetGroup ? 1 : 0,
+                Name = Coalesce(vars.ElasticacheSubnetGroupName, vars.Name).ToLower(),
+                Description = $"Elasticache subnet group for {vars.Name}",
+                SubnetIds = ElasticacheSubnets.Select(x => x.Id).ToArray(),
+                Tags = Merge(new Dictionary<string, string>
+                    {
+                        ["Name"] = Coalesce(vars.ElasticacheSubnetGroupName, vars.Name).ToLower()
+                    },
+                    vars.Tags,
+                    vars.ElasticacheSubnetGroupTags)
             });
 
             #endregion

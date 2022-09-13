@@ -215,7 +215,7 @@ namespace Cdktf.Dotnet.Aws
         /// <summary>
         /// Suffix to append to elasticache subnets name
         /// </summary>
-        public string ElasticacheSubnetSuffix { get; set; } = "elasticache";
+        public string ElastiCacheSubnetSuffix { get; set; } = "elasticache";
 
         /// <summary>
         /// Additional tags for the elasticache route tables
@@ -412,6 +412,33 @@ namespace Cdktf.Dotnet.Aws
         /// Additional tags for the database subnet group
         /// </summary>
         public IDictionary<string, string> DatabaseSubnetGroupTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Assign IPv6 address on elasticache subnet, must be disabled to change IPv6 CIDRs. This is the IPv6 equivalent of map_public_ip_on_launch
+        /// </summary>
+        public bool ElasticacheSubnetAssignIpv6AddressOnCreation { get; set; } = false;
+
+        /// <summary>
+        /// Assigns IPv6 elasticache subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list
+        /// </summary>
+        public IList<string> ElasticacheSubnetIpv6Prefixes { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Additional tags for the elasticache subnets
+        /// </summary>
+        public IDictionary<string, string> ElasticacheSubnetTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Name of elasticache subnet group
+        /// </summary>
+        public string ElasticacheSubnetGroupName { get; set; } = "";
+        
+        /// <summary>
+        /// Controls if elasticache subnet group should be created
+        /// </summary>
+        public bool CreateElasticacheSubnetGroup { get; set; } = true;
+
+        public IDictionary<string, string> ElasticacheSubnetGroupTags { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
         /// A list of availability zones names or ids in the region
