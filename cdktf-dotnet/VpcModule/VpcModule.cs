@@ -16,8 +16,8 @@ namespace Cdktf.Dotnet.Aws
         public List<Subnet> PublicSubnets { get; }
         public List<Subnet> PrivateSubnets { get; }
         public List<Subnet> OutpostSubnets { get; }
-        
         public List<Subnet> DatabaseSubnets { get; }
+        public List<Subnet> RedshiftSubnets { get; }
 
         public string VpcId => _vpc.Id;
 
@@ -499,7 +499,7 @@ namespace Cdktf.Dotnet.Aws
                         vars.DatabaseSubnetTags)
                 });
 
-                OutpostSubnets.Add(subnet);
+                DatabaseSubnets.Add(subnet);
             }
 
             var dbSubnetGroup = new DbSubnetGroup(scope, "db-subnet-group", new DbSubnetGroupConfig
@@ -517,6 +517,57 @@ namespace Cdktf.Dotnet.Aws
             
             #endregion
 
+            #region Redshift subnet
+
+            var redshiftSubnetCount = _isCreateVpc && vars.RedshiftSubnets.Count > 0
+                ? vars.RedshiftSubnets.Count
+                : 0;
+
+            RedshiftSubnets = new List<Subnet>();
+            
+            for (var i = 0; i < redshiftSubnetCount; i++)
+            {
+                var subnet = new Subnet(scope, $"redshift-subnet-{i}", new SubnetConfig
+                {
+                    Count = 1,
+                    VpcId = _vpc.Id,
+                    CidrBlock = vars.RedshiftSubnets[i],
+                    AvailabilityZone = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length > 0 ? vars.Azs[i]: "",
+                    AvailabilityZoneId = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length == 0 ? vars.Azs[i]: "",
+                    AssignIpv6AddressOnCreation = vars.RedshiftSubnetAssignIpv6AddressOnCreation == false
+                        ? vars.AssignIpv6AddressOnCreation
+                        : vars.RedshiftSubnetAssignIpv6AddressOnCreation,
+
+                    Ipv6CidrBlock = vars.EnableIpv6 && vars.RedshiftSubnetIpv6Prefixes.Count > 0
+                        ? Fn.Cidrsubnet(_vpc.Ipv6CidrBlock, 8, double.Parse(vars.RedshiftSubnetIpv6Prefixes[i]))
+                        : "",
+
+                    Tags = Merge(new Dictionary<string, string>
+                        {
+                            ["Name"] = $"{vars.Name}-{vars.RedshiftSubnetSuffix}-{vars.Azs[i]}"
+                        },
+                        vars.Tags,
+                        vars.RedshiftSubnetTags)
+                });
+
+                RedshiftSubnets.Add(subnet);
+            }
+
+            var redshiftSubnetGroup = new DbSubnetGroup(scope, "redshift-subnet-group", new DbSubnetGroupConfig
+            {
+                Count = _isCreateVpc && vars.RedshiftSubnets.Count > 0 && vars.CreateRedshiftSubnetGroup ? 1 : 0,
+                Description = Coalesce(vars.RedshiftSubnetGroupName, vars.Name).ToLower(),
+                SubnetIds = RedshiftSubnets.Select(x => x.Id).ToArray(),
+                Tags = Merge(new Dictionary<string, string>
+                    {
+                        ["Name"] = Coalesce(vars.RedshiftSubnetGroupName, vars.Name).ToLower()
+                    },
+                    vars.Tags,
+                    vars.RedshiftSubnetGroupTags)
+            });
+
+            #endregion
+            
             // Output
 
             new TerraformOutput(scope, "vpc id", new TerraformOutputConfig()
