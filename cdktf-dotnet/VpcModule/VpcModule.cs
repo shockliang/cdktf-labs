@@ -663,6 +663,35 @@ namespace Cdktf.Dotnet.Aws
             }
 
             #endregion
+
+            #region Default Network ACLs
+
+            string[]? subnetIdsForDefaultNetworkAcl = null;
+            
+            var defaultNetworkAcl = new DefaultNetworkAcl(scope, "default-network-acl", new DefaultNetworkAclConfig
+            {
+                Count = _isCreateVpc && vars.ManageDefaultNetworkAcl ? 1 : 0,
+                // subnet_ids is using lifecycle ignore_changes, so it is not necessary to list
+                // any explicitly. See https://github.com/terraform-aws-modules/terraform-aws-vpc/issues/736.
+                SubnetIds = subnetIdsForDefaultNetworkAcl,
+                
+                Ingress = vars.DefaultNetworkAclIngress,
+                Egress = vars.DefaultNetworkAclEgress,
+
+                Tags = Merge(new Dictionary<string, string>
+                    {
+                        ["Name"] = Coalesce(vars.DefaultNetworkAclName, vars.Name)
+                    },
+                    vars.Tags,
+                    vars.DefaultNetworkAclTags),
+                
+                Lifecycle = new TerraformResourceLifecycle
+                {
+                    IgnoreChanges = new [] {subnetIdsForDefaultNetworkAcl}
+                }
+            });
+
+            #endregion
             
             // Output
 

@@ -459,6 +459,71 @@ namespace Cdktf.Dotnet.Aws
         public IDictionary<string, string> IntraSubnetTags { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
+        /// Should be true to adopt and manage Default Network ACL
+        /// </summary>
+        public bool ManageDefaultNetworkAcl { get; set; } = false;
+
+        /// <summary>
+        /// Name to be used on the Default Network ACL
+        /// </summary>
+        public string DefaultNetworkAclName { get; set; } = "";
+        
+        /// <summary>
+        /// Additional tags for the Default Network ACL
+        /// </summary>
+        public IDictionary<string, string> DefaultNetworkAclTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// List of maps of ingress rules to set on the Default Network ACL
+        /// </summary>
+        public IList<DefaultNetworkAclEgress> DefaultNetworkAclIngress { get; set; } = new List<DefaultNetworkAclEgress>
+        {
+            new DefaultNetworkAclEgress
+            {
+                RuleNo = 100,
+                Action = "allow",
+                FromPort = 0,
+                ToPort = 0,
+                Protocol = "-1",
+                CidrBlock = "0.0.0.0/0"
+            },
+            new DefaultNetworkAclEgress
+            {
+                RuleNo = 101,
+                Action = "allow",
+                FromPort = 0,
+                ToPort = 0,
+                Protocol = "-1",
+                Ipv6CidrBlock = "::/0"
+            }
+        };
+
+        /// <summary>
+        /// List of maps of egress rules to set on the Default Network ACL"
+        /// </summary>
+        public IList<DefaultNetworkAclEgress> DefaultNetworkAclEgress = new List<DefaultNetworkAclEgress>
+        {
+            new DefaultNetworkAclEgress
+            {
+                RuleNo = 100,
+                Action = "allow",
+                FromPort = 0,
+                ToPort = 0,
+                Protocol = "-1",
+                CidrBlock = "0.0.0.0/0"
+            },
+            new DefaultNetworkAclEgress
+            {
+                RuleNo = 101,
+                Action = "allow",
+                FromPort = 0,
+                ToPort = 0,
+                Protocol = "-1",
+                Ipv6CidrBlock = "::/0"
+            }
+        };
+
+        /// <summary>
         /// A list of availability zones names or ids in the region
         /// </summary>
         public IList<string> Azs { get; set; } = new List<string>();
