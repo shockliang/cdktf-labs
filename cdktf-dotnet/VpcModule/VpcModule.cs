@@ -21,6 +21,7 @@ namespace Cdktf.Dotnet.Aws
         public List<Subnet> DatabaseSubnets { get; }
         public List<Subnet> RedshiftSubnets { get; }
         public List<Subnet> ElasticacheSubnets { get; }
+        public List<Subnet> IntraSubnets { get; }
 
         public string VpcId => _vpc.Id;
 
@@ -622,6 +623,44 @@ namespace Cdktf.Dotnet.Aws
                     vars.Tags,
                     vars.ElasticacheSubnetGroupTags)
             });
+
+            #endregion
+
+            #region Intra subnets - private subnet without NAT gateway
+
+            var intraSubnetCount = _isCreateVpc && vars.IntraSubnets.Count > 0
+                ? vars.IntraSubnets.Count
+                : 0;
+
+            IntraSubnets = new List<Subnet>();
+            
+            for (var i = 0; i < intraSubnetCount; i++)
+            {
+                var subnet = new Subnet(scope, $"intra-subnet-{i}", new SubnetConfig
+                {
+                    Count = 1,
+                    VpcId = _vpc.Id,
+                    CidrBlock = vars.IntraSubnets[i],
+                    AvailabilityZone = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length > 0 ? vars.Azs[i]: "",
+                    AvailabilityZoneId = Fn.Regexall("^[a-z]{2}-", vars.Azs[i]).Length == 0 ? vars.Azs[i]: "",
+                    AssignIpv6AddressOnCreation = vars.IntraSubnetAssignIpv6AddressOnCreation == false
+                        ? vars.AssignIpv6AddressOnCreation
+                        : vars.IntraSubnetAssignIpv6AddressOnCreation,
+
+                    Ipv6CidrBlock = vars.EnableIpv6 && vars.IntraSubnetIpv6Prefixes.Count > 0
+                        ? Fn.Cidrsubnet(_vpc.Ipv6CidrBlock, 8, double.Parse(vars.IntraSubnetIpv6Prefixes[i]))
+                        : "",
+
+                    Tags = Merge(new Dictionary<string, string>
+                        {
+                            ["Name"] = $"{vars.Name}-{vars.IntraSubnetSuffix}-{vars.Azs[i]}"
+                        },
+                        vars.Tags,
+                        vars.IntraSubnetTags)
+                });
+
+                IntraSubnets.Add(subnet);
+            }
 
             #endregion
             

@@ -438,7 +438,25 @@ namespace Cdktf.Dotnet.Aws
         /// </summary>
         public bool CreateElasticacheSubnetGroup { get; set; } = true;
 
+        /// <summary>
+        /// Additional tags for the elasticache subnet group
+        /// </summary>
         public IDictionary<string, string> ElasticacheSubnetGroupTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Assign IPv6 address on intra subnet, must be disabled to change IPv6 CIDRs. This is the IPv6 equivalent of map_public_ip_on_launch
+        /// </summary>
+        public bool IntraSubnetAssignIpv6AddressOnCreation { get; set; } = false;
+
+        /// <summary>
+        /// Assigns IPv6 intra subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list
+        /// </summary>
+        public IList<string> IntraSubnetIpv6Prefixes { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Additional tags for the intra subnets
+        /// </summary>
+        public IDictionary<string, string> IntraSubnetTags { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
         /// A list of availability zones names or ids in the region
