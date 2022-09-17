@@ -522,6 +522,48 @@ namespace Cdktf.Dotnet.Aws
                 Ipv6CidrBlock = "::/0"
             }
         };
+        
+        /// <summary>
+        /// Whether to use dedicated network ACL (not default) and custom rules for public subnets
+        /// </summary>
+        public bool PublicDedicatedNetworkAcl { get; set; } = false;
+
+        /// <summary>
+        /// Additional tags for the public subnets network ACL
+        /// </summary>
+        public IDictionary<string, string> PublicAclTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Public subnets inbound network ACLs
+        /// </summary>
+        public IList<NetworkAclIngress> PublicInboundAclRules = new List<NetworkAclIngress>
+        {
+            new NetworkAclIngress
+            {
+                RuleNo = 100,
+                Action = "allow",
+                FromPort = 0,
+                ToPort = 0,
+                Protocol = "-1",
+                CidrBlock = "0.0.0.0/0",
+            }
+        };
+        
+        /// <summary>
+        /// Public subnets outbound network ACLs
+        /// </summary>
+        public IList<NetworkAclEgress> PublicOutboundAclRules = new List<NetworkAclEgress>
+        {
+            new NetworkAclEgress
+            {
+                RuleNo = 100,
+                Action = "allow",
+                FromPort = 0,
+                ToPort = 0,
+                Protocol = "-1",
+                CidrBlock = "0.0.0.0/0",
+            }
+        };
 
         /// <summary>
         /// A list of availability zones names or ids in the region

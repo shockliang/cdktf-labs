@@ -692,6 +692,80 @@ namespace Cdktf.Dotnet.Aws
             });
 
             #endregion
+
+            #region Public Network ACLs
+
+            var publicNetworkAcl = new NetworkAcl(scope, "public-network-acl", new NetworkAclConfig
+            {
+                Count = _isCreateVpc && vars.PublicDedicatedNetworkAcl && vars.PublicSubnets.Count > 0 ? 1 : 0,
+                VpcId = _vpc.Id,
+                SubnetIds = PublicSubnets.Select(x => x.Id).ToArray(),
+                Tags = Merge(new Dictionary<string, string>
+                    {
+                        ["Name"] = $"{vars.Name}-${vars.PublicSubnetSuffix}"
+                    },
+                    vars.Tags,
+                    vars.PublicAclTags)
+            });
+
+            var publicInboundAclRuleCount = _isCreateVpc
+                                            && vars.PublicDedicatedNetworkAcl
+                                            && vars.PublicSubnets.Count > 0
+                ? vars.PublicInboundAclRules.Count
+                : 0;
+
+            var publicInboundAclRules = new List<NetworkAclRule>();
+            
+            for (var i = 0; i < publicInboundAclRuleCount; i++)
+            {
+                var rule = new NetworkAclRule(scope, "public-inbound-acl-rule", new NetworkAclRuleConfig
+                {
+                    Count = 1,
+                    NetworkAclId = publicNetworkAcl.Id,
+                    Egress = false,
+                    RuleNumber = vars.PublicInboundAclRules[i].RuleNo.Value,
+                    RuleAction = vars.PublicInboundAclRules[i].Action,
+                    FromPort = vars.PublicInboundAclRules[i].FromPort,
+                    ToPort = vars.PublicInboundAclRules[i].ToPort,
+                    IcmpCode = vars.PublicInboundAclRules[i].IcmpCode,
+                    IcmpType = vars.PublicInboundAclRules[i].IcmpType,
+                    Protocol = vars.PublicInboundAclRules[i].Protocol,
+                    CidrBlock = vars.PublicInboundAclRules[i].CidrBlock,
+                    Ipv6CidrBlock = vars.PublicInboundAclRules[i].Ipv6CidrBlock
+                });
+                
+                publicInboundAclRules.Add(rule);
+            }
+            
+            var publicOutboundAclRuleCount = _isCreateVpc
+                                            && vars.PublicDedicatedNetworkAcl
+                                            && vars.PublicSubnets.Count > 0
+                ? vars.PublicOutboundAclRules.Count
+                : 0;
+
+            var publicOutboundAclRules = new List<NetworkAclRule>();
+            
+            for (var i = 0; i < publicOutboundAclRuleCount; i++)
+            {
+                var rule = new NetworkAclRule(scope, "public-outbound-acl-rule", new NetworkAclRuleConfig
+                {
+                    Count = 1,
+                    NetworkAclId = publicNetworkAcl.Id,
+                    Egress = true,
+                    RuleNumber = vars.PublicOutboundAclRules[i].RuleNo.Value,
+                    RuleAction = vars.PublicOutboundAclRules[i].Action,
+                    FromPort = vars.PublicOutboundAclRules[i].FromPort,
+                    ToPort = vars.PublicOutboundAclRules[i].ToPort,
+                    IcmpCode = vars.PublicOutboundAclRules[i].IcmpCode,
+                    IcmpType = vars.PublicOutboundAclRules[i].IcmpType,
+                    Protocol = vars.PublicOutboundAclRules[i].Protocol,
+                    CidrBlock = vars.PublicOutboundAclRules[i].CidrBlock,
+                    Ipv6CidrBlock = vars.PublicOutboundAclRules[i].Ipv6CidrBlock
+                });
+                
+                publicOutboundAclRules.Add(rule);
+            }
+            #endregion
             
             // Output
 
