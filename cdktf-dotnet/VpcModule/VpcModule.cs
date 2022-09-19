@@ -797,15 +797,15 @@ namespace Cdktf.Dotnet.Aws
                     Count = 1,
                     NetworkAclId = privateNetworkAcl.Id,
                     Egress = false,
-                    RuleNumber = vars.PublicInboundAclRules[i].RuleNo.Value,
-                    RuleAction = vars.PublicInboundAclRules[i].Action,
-                    FromPort = vars.PublicInboundAclRules[i].FromPort,
-                    ToPort = vars.PublicInboundAclRules[i].ToPort,
-                    IcmpCode = vars.PublicInboundAclRules[i].IcmpCode,
-                    IcmpType = vars.PublicInboundAclRules[i].IcmpType,
-                    Protocol = vars.PublicInboundAclRules[i].Protocol,
-                    CidrBlock = vars.PublicInboundAclRules[i].CidrBlock,
-                    Ipv6CidrBlock = vars.PublicInboundAclRules[i].Ipv6CidrBlock
+                    RuleNumber = vars.PrivateInboundAclRules[i].RuleNo.Value,
+                    RuleAction = vars.PrivateInboundAclRules[i].Action,
+                    FromPort = vars.PrivateInboundAclRules[i].FromPort,
+                    ToPort = vars.PrivateInboundAclRules[i].ToPort,
+                    IcmpCode = vars.PrivateInboundAclRules[i].IcmpCode,
+                    IcmpType = vars.PrivateInboundAclRules[i].IcmpType,
+                    Protocol = vars.PrivateInboundAclRules[i].Protocol,
+                    CidrBlock = vars.PrivateInboundAclRules[i].CidrBlock,
+                    Ipv6CidrBlock = vars.PrivateInboundAclRules[i].Ipv6CidrBlock
                 });
                 
                 privateInboundAclRules.Add(rule);
@@ -821,10 +821,10 @@ namespace Cdktf.Dotnet.Aws
             
             for (var i = 0; i < privateOutboundAclRuleCount; i++)
             {
-                var rule = new NetworkAclRule(scope, $"public-outbound-acl-rule-{i}", new NetworkAclRuleConfig
+                var rule = new NetworkAclRule(scope, $"private-outbound-acl-rule-{i}", new NetworkAclRuleConfig
                 {
                     Count = 1,
-                    NetworkAclId = publicNetworkAcl.Id,
+                    NetworkAclId = privateNetworkAcl.Id,
                     Egress = true,
                     RuleNumber = vars.PrivateOutboundAclRules[i].RuleNo.Value,
                     RuleAction = vars.PrivateOutboundAclRules[i].Action,
@@ -838,6 +838,81 @@ namespace Cdktf.Dotnet.Aws
                 });
                 
                 privateOutboundAclRules.Add(rule);
+            }
+
+            #endregion
+
+            #region Outpost Network ACLs
+            
+            var outpostNetworkAcl = new NetworkAcl(scope, "outpost-network-acl", new NetworkAclConfig
+            {
+                Count = _isCreateVpc && vars.OutpostDedicatedNetworkAcl && vars.OutpostSubnets.Count > 0 ? 1 : 0,
+                VpcId = _vpc.Id,
+                SubnetIds = OutpostSubnets.Select(x => x.Id).ToArray(),
+                Tags = Merge(new Dictionary<string, string>
+                    {
+                        ["Name"] = $"{vars.Name}-${vars.OutpostSubnetSuffix}"
+                    },
+                    vars.Tags,
+                    vars.OutpostAclTags)
+            });
+
+            var outpostInboundAclRuleCount = _isCreateVpc
+                                            && vars.OutpostDedicatedNetworkAcl
+                                            && vars.OutpostSubnets.Count > 0
+                ? vars.OutpostInboundAclRules.Count
+                : 0;
+
+            var outpostInboundAclRules = new List<NetworkAclRule>();
+            
+            for (var i = 0; i < outpostInboundAclRuleCount; i++)
+            {
+                var rule = new NetworkAclRule(scope, $"outpost-inbound-acl-rule-{i}", new NetworkAclRuleConfig
+                {
+                    Count = 1,
+                    NetworkAclId = outpostNetworkAcl.Id,
+                    Egress = false,
+                    RuleNumber = vars.OutpostInboundAclRules[i].RuleNo.Value,
+                    RuleAction = vars.OutpostInboundAclRules[i].Action,
+                    FromPort = vars.OutpostInboundAclRules[i].FromPort,
+                    ToPort = vars.OutpostInboundAclRules[i].ToPort,
+                    IcmpCode = vars.OutpostInboundAclRules[i].IcmpCode,
+                    IcmpType = vars.OutpostInboundAclRules[i].IcmpType,
+                    Protocol = vars.OutpostInboundAclRules[i].Protocol,
+                    CidrBlock = vars.OutpostInboundAclRules[i].CidrBlock,
+                    Ipv6CidrBlock = vars.OutpostInboundAclRules[i].Ipv6CidrBlock
+                });
+                
+                outpostInboundAclRules.Add(rule);
+            }
+            
+            var outpostOutboundAclRuleCount = _isCreateVpc
+                                            && vars.OutpostDedicatedNetworkAcl
+                                            && vars.OutpostSubnets.Count > 0
+                ? vars.OutpostOutboundAclRules.Count
+                : 0;
+
+            var outpostOutboundAclRules = new List<NetworkAclRule>();
+            
+            for (var i = 0; i < outpostOutboundAclRuleCount; i++)
+            {
+                var rule = new NetworkAclRule(scope, $"outpost-outbound-acl-rule-{i}", new NetworkAclRuleConfig
+                {
+                    Count = 1,
+                    NetworkAclId = outpostNetworkAcl.Id,
+                    Egress = true,
+                    RuleNumber = vars.OutpostOutboundAclRules[i].RuleNo.Value,
+                    RuleAction = vars.OutpostOutboundAclRules[i].Action,
+                    FromPort = vars.OutpostOutboundAclRules[i].FromPort,
+                    ToPort = vars.OutpostOutboundAclRules[i].ToPort,
+                    IcmpCode = vars.OutpostOutboundAclRules[i].IcmpCode,
+                    IcmpType = vars.OutpostOutboundAclRules[i].IcmpType,
+                    Protocol = vars.OutpostOutboundAclRules[i].Protocol,
+                    CidrBlock = vars.OutpostOutboundAclRules[i].CidrBlock,
+                    Ipv6CidrBlock = vars.OutpostOutboundAclRules[i].Ipv6CidrBlock
+                });
+                
+                outpostOutboundAclRules.Add(rule);
             }
 
             #endregion

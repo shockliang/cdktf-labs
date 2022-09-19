@@ -608,6 +608,48 @@ namespace Cdktf.Dotnet.Aws
         };
 
         /// <summary>
+        /// Whether to use dedicated network ACL (not default) and custom rules for outpost subnets
+        /// </summary>
+        public bool OutpostDedicatedNetworkAcl { get; set; } = false;
+
+        /// <summary>
+        /// Additional tags for the outpost subnets network ACL
+        /// </summary>
+        public IDictionary<string, string> OutpostAclTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Outpost subnets inbound network ACLs
+        /// </summary>
+        public IList<NetworkAclIngress> OutpostInboundAclRules { get; set; } = new List<NetworkAclIngress>
+        {
+            new NetworkAclIngress
+            {
+                RuleNo = 100,
+                Action = "allow",
+                FromPort = 0,
+                ToPort = 0,
+                Protocol = "-1",
+                CidrBlock = "0.0.0.0/0",
+            }
+        };
+
+        /// <summary>
+        /// Outpost subnets outbound network ACLs
+        /// </summary>
+        public IList<NetworkAclEgress> OutpostOutboundAclRules { get; set; } = new List<NetworkAclEgress>
+        {
+            new NetworkAclEgress
+            {
+                RuleNo = 100,
+                Action = "allow",
+                FromPort = 0,
+                ToPort = 0,
+                Protocol = "-1",
+                CidrBlock = "0.0.0.0/0",
+            }
+        };
+
+        /// <summary>
         /// A list of availability zones names or ids in the region
         /// </summary>
         public IList<string> Azs { get; set; } = new List<string>();
