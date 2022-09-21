@@ -991,6 +991,81 @@ namespace Cdktf.Dotnet.Aws
             }
 
             #endregion
+
+            #region Database Network ACLs
+
+            var databaseNetworkAcl = new NetworkAcl(scope, "database-network-acl", new NetworkAclConfig
+            {
+                Count = _isCreateVpc && vars.DatabaseDedicatedNetworkAcl && vars.DatabaseSubnets.Count > 0 ? 1 : 0,
+                VpcId = _vpc.Id,
+                SubnetIds = DatabaseSubnets.Select(x => x.Id).ToArray(),
+                Tags = Merge(new Dictionary<string, string>
+                    {
+                        ["Name"] = $"{vars.Name}-${vars.DatabaseSubnetSuffix}"
+                    },
+                    vars.Tags,
+                    vars.DatabaseAclTags)
+            });
+
+            var databaseInboundAclRuleCount = _isCreateVpc
+                                            && vars.DatabaseDedicatedNetworkAcl
+                                            && vars.DatabaseSubnets.Count > 0
+                ? vars.DatabaseInboundAclRules.Count
+                : 0;
+
+            var databaseInboundAclRules = new List<NetworkAclRule>();
+            
+            for (var i = 0; i < databaseInboundAclRuleCount; i++)
+            {
+                var rule = new NetworkAclRule(scope, $"database-inbound-acl-rule-{i}", new NetworkAclRuleConfig
+                {
+                    Count = 1,
+                    NetworkAclId = databaseNetworkAcl.Id,
+                    Egress = false,
+                    RuleNumber = vars.DatabaseInboundAclRules[i].RuleNo.Value,
+                    RuleAction = vars.DatabaseInboundAclRules[i].Action,
+                    FromPort = vars.DatabaseInboundAclRules[i].FromPort,
+                    ToPort = vars.DatabaseInboundAclRules[i].ToPort,
+                    IcmpCode = vars.DatabaseInboundAclRules[i].IcmpCode,
+                    IcmpType = vars.DatabaseInboundAclRules[i].IcmpType,
+                    Protocol = vars.DatabaseInboundAclRules[i].Protocol,
+                    CidrBlock = vars.DatabaseInboundAclRules[i].CidrBlock,
+                    Ipv6CidrBlock = vars.DatabaseInboundAclRules[i].Ipv6CidrBlock
+                });
+                
+                databaseInboundAclRules.Add(rule);
+            }
+            
+            var databaseOutboundAclRuleCount = _isCreateVpc
+                                            && vars.DatabaseDedicatedNetworkAcl
+                                            && vars.DatabaseSubnets.Count > 0
+                ? vars.DatabaseOutboundAclRules.Count
+                : 0;
+
+            var databaseOutboundAclRules = new List<NetworkAclRule>();
+            
+            for (var i = 0; i < databaseOutboundAclRuleCount; i++)
+            {
+                var rule = new NetworkAclRule(scope, $"database-outbound-acl-rule-{i}", new NetworkAclRuleConfig
+                {
+                    Count = 1,
+                    NetworkAclId = databaseNetworkAcl.Id,
+                    Egress = true,
+                    RuleNumber = vars.DatabaseOutboundAclRules[i].RuleNo.Value,
+                    RuleAction = vars.DatabaseOutboundAclRules[i].Action,
+                    FromPort = vars.DatabaseOutboundAclRules[i].FromPort,
+                    ToPort = vars.DatabaseOutboundAclRules[i].ToPort,
+                    IcmpCode = vars.DatabaseOutboundAclRules[i].IcmpCode,
+                    IcmpType = vars.DatabaseOutboundAclRules[i].IcmpType,
+                    Protocol = vars.DatabaseOutboundAclRules[i].Protocol,
+                    CidrBlock = vars.DatabaseOutboundAclRules[i].CidrBlock,
+                    Ipv6CidrBlock = vars.DatabaseOutboundAclRules[i].Ipv6CidrBlock
+                });
+                
+                databaseOutboundAclRules.Add(rule);
+            }
+
+            #endregion
             
             // Output
 

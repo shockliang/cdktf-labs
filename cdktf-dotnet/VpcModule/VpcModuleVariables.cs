@@ -692,6 +692,48 @@ namespace Cdktf.Dotnet.Aws
         };
 
         /// <summary>
+        /// Whether to use dedicated network ACL (not default) and custom rules for database subnets
+        /// </summary>
+        public bool DatabaseDedicatedNetworkAcl { get; set; } = false;
+
+        /// <summary>
+        /// Additional tags for the database subnets network ACL
+        /// </summary>
+        public IDictionary<string, string> DatabaseAclTags { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Database subnets inbound network ACL rules
+        /// </summary>
+        public IList<NetworkAclIngress> DatabaseInboundAclRules { get; set; } = new List<NetworkAclIngress>
+        {
+            new NetworkAclIngress
+            {
+                RuleNo = 100,
+                Action = "allow",
+                FromPort = 0,
+                ToPort = 0,
+                Protocol = "-1",
+                CidrBlock = "0.0.0.0/0",
+            }
+        };
+        
+        /// <summary>
+        /// Database subnets outbound network ACL rules
+        /// </summary>
+        public IList<NetworkAclEgress> DatabaseOutboundAclRules { get; set; } = new List<NetworkAclEgress>
+        {
+            new NetworkAclEgress
+            {
+                RuleNo = 100,
+                Action = "allow",
+                FromPort = 0,
+                ToPort = 0,
+                Protocol = "-1",
+                CidrBlock = "0.0.0.0/0",
+            }
+        };
+
+        /// <summary>
         /// A list of availability zones names or ids in the region
         /// </summary>
         public IList<string> Azs { get; set; } = new List<string>();
