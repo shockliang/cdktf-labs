@@ -1066,6 +1066,81 @@ namespace Cdktf.Dotnet.Aws
             }
 
             #endregion
+
+            #region Redshift Network ACLs
+
+            var redshiftNetworkAcl = new NetworkAcl(scope, "redshift-network-acl", new NetworkAclConfig
+            {
+                Count = _isCreateVpc && vars.RedshiftDedicatedNetworkAcl && vars.RedshiftSubnets.Count > 0 ? 1 : 0,
+                VpcId = _vpc.Id,
+                SubnetIds = RedshiftSubnets.Select(x => x.Id).ToArray(),
+                Tags = Merge(new Dictionary<string, string>
+                    {
+                        ["Name"] = $"{vars.Name}-${vars.RedshiftSubnetSuffix}"
+                    },
+                    vars.Tags,
+                    vars.RedshiftAclTags)
+            });
+
+            var redshiftInboundAclRuleCount = _isCreateVpc
+                                            && vars.RedshiftDedicatedNetworkAcl
+                                            && vars.RedshiftSubnets.Count > 0
+                ? vars.RedshiftInboundAclRules.Count
+                : 0;
+
+            var redshiftInboundAclRules = new List<NetworkAclRule>();
+            
+            for (var i = 0; i < redshiftInboundAclRuleCount; i++)
+            {
+                var rule = new NetworkAclRule(scope, $"redshift-inbound-acl-rule-{i}", new NetworkAclRuleConfig
+                {
+                    Count = 1,
+                    NetworkAclId = redshiftNetworkAcl.Id,
+                    Egress = false,
+                    RuleNumber = vars.RedshiftInboundAclRules[i].RuleNo.Value,
+                    RuleAction = vars.RedshiftInboundAclRules[i].Action,
+                    FromPort = vars.RedshiftInboundAclRules[i].FromPort,
+                    ToPort = vars.RedshiftInboundAclRules[i].ToPort,
+                    IcmpCode = vars.RedshiftInboundAclRules[i].IcmpCode,
+                    IcmpType = vars.RedshiftInboundAclRules[i].IcmpType,
+                    Protocol = vars.RedshiftInboundAclRules[i].Protocol,
+                    CidrBlock = vars.RedshiftInboundAclRules[i].CidrBlock,
+                    Ipv6CidrBlock = vars.RedshiftInboundAclRules[i].Ipv6CidrBlock
+                });
+                
+                redshiftInboundAclRules.Add(rule);
+            }
+            
+            var redshiftOutboundAclRuleCount = _isCreateVpc
+                                            && vars.RedshiftDedicatedNetworkAcl
+                                            && vars.RedshiftSubnets.Count > 0
+                ? vars.RedshiftOutboundAclRules.Count
+                : 0;
+
+            var redshiftOutboundAclRules = new List<NetworkAclRule>();
+            
+            for (var i = 0; i < redshiftOutboundAclRuleCount; i++)
+            {
+                var rule = new NetworkAclRule(scope, $"redshift-outbound-acl-rule-{i}", new NetworkAclRuleConfig
+                {
+                    Count = 1,
+                    NetworkAclId = redshiftNetworkAcl.Id,
+                    Egress = true,
+                    RuleNumber = vars.RedshiftOutboundAclRules[i].RuleNo.Value,
+                    RuleAction = vars.RedshiftOutboundAclRules[i].Action,
+                    FromPort = vars.RedshiftOutboundAclRules[i].FromPort,
+                    ToPort = vars.RedshiftOutboundAclRules[i].ToPort,
+                    IcmpCode = vars.RedshiftOutboundAclRules[i].IcmpCode,
+                    IcmpType = vars.RedshiftOutboundAclRules[i].IcmpType,
+                    Protocol = vars.RedshiftOutboundAclRules[i].Protocol,
+                    CidrBlock = vars.RedshiftOutboundAclRules[i].CidrBlock,
+                    Ipv6CidrBlock = vars.RedshiftOutboundAclRules[i].Ipv6CidrBlock
+                });
+                
+                redshiftOutboundAclRules.Add(rule);
+            }
+
+            #endregion
             
             // Output
 
